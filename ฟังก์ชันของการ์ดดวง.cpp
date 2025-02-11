@@ -5,7 +5,8 @@
 using namespace std;
 
 string drawFortuneCard() {
-    vector<string> cards = {"1","2","3","4","5","6","7","8","9"};
+    vector<string> cards = {"Suan Krua","Moisgure","Aoa Mue","Hom Bun","Regular Customer","Moldy Cutting Board","Hom poy","Ngan Katin","The Kitchen","Rainy Season","Broken Mortar","Fliped"};
+    
     srand(time(0));
     
 
