@@ -48,12 +48,12 @@ vector<Ingredient> vegetables = {
 };
 
 vector<Ingredient> spice = {
-    {"Makwaen", "herb"},
-    {"Fragrant", "herb"},
-    {"Fennel Seed", "herb"},
-    {"Dried Galangal", "herb"},
-    {"Cardamom", "herb"},
-    {"Chili Spur Pepper", "herb"},
-    {"Caraway", "herb"}
+    {"Makwaen", "spice"},
+    {"Fragrant", "spice"},
+    {"Fennel Seed", "spice"},
+    {"Dried Galangal", "spice"},
+    {"Cardamom", "spice"},
+    {"Chili Spur Pepper", "spice"},
+    {"Caraway", "spice"}
 };
 
