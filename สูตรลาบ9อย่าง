@@ -1,0 +1,47 @@
+#include <iostream>
+#include <vector>
+using namespace std;
+
+struct LarbRecipe {
+    string recipe_name;
+    vector<string> meats;
+    vector<string> spices;
+    vector<string> herbs;
+    vector<string> vegetables;
+};
+
+void printRecipe(const LarbRecipe& recipe) {
+    cout << "Recipe: " << recipe.recipe_name << endl;
+    cout << "Meats: ";
+    for (const auto& meat : recipe.meats) cout << meat << ", ";
+    cout << endl;
+    cout << "Spices: ";
+    for (const auto& spice : recipe.spices) cout << spice << ", ";
+    cout << endl;
+    cout << "Herbs: ";
+    for (const auto& herb : recipe.herbs) cout << herb << ", ";
+    cout << endl;
+    cout << "Vegetables: ";
+    for (const auto& vegetable : recipe.vegetables) cout << vegetable << ", ";
+    cout << "\n----------------------\n";
+}
+
+int main() {
+    vector<LarbRecipe> recipes = {
+        {"Laab Wua Khom", {"Beef", "Fried garlic", "Bile", "Blood"}, {"Makwaen", "Coriander", "Nutmeg", "Star Anise", "Black Pepper", "Long Pepper", "Cinnamon", "Clove"}, {"Makwaen", "Fragrant", "Fennel Seed", "Dried Galangal", "Cardamom", "Chili Spur Pepper", "Caraway"}, {"Matoom", "KaowTong", "Oreille", "Deeplygung", "Makwen-infused Fish Sauce", "Dried Fennel Seed", "Phak Paem", "Vietnamese Coriander", "Damocles Tree", "Parsley", "Para Cress", "Olive"}},
+        {"Laab Lor", {"Beef", "Buffalo", "Fried Garlic", "Blood", "Offal"}, {"Makwaen", "Coriander", "Nutmeg", "Star Anise", "Black Pepper", "Long Pepper", "Cinnamon", "Clove"}, {"Makwaen", "Fragrant", "Fennel Seed", "Dried Galangal", "Cardamom", "Chili Spur Pepper", "Caraway"}, {"Matoom", "KaowTong", "Oreille", "Deeplygung", "Makwen-infused Fish Sauce", "Dried Fennel Seed", "Phak Paem", "Vietnamese Coriander", "Damocles Tree", "Parsley", "Para Cress", "Olive"}},
+        {"Laab Mi", {"Fried Garlic", "Blood", "Offal"}, {"Makwaen", "Coriander", "Nutmeg", "Star Anise", "Black Pepper", "Long Pepper", "Cinnamon", "Clove"}, {"Makwaen", "Fragrant", "Fennel Seed", "Dried Galangal", "Cardamom", "Chili Spur Pepper", "Caraway"}, {"Matoom", "KaowTong", "Oreille", "Deeplygung", "Makwen-infused Fish Sauce", "Dried Fennel Seed", "Phak Paem", "Vietnamese Coriander", "Damocles Tree", "Parsley", "Para Cress", "Olive"}},
+        {"Laab Wua Niao", {"Beef", "Fried Garlic", "Blood", "Offal"}, {"Makwaen", "Coriander", "Nutmeg", "Star Anise", "Black Pepper", "Long Pepper", "Cinnamon", "Clove"}, {"Makwaen", "Fragrant", "Fennel Seed", "Dried Galangal", "Cardamom", "Chili Spur Pepper", "Caraway"}, {"Matoom", "KaowTong", "Oreille", "Deeplygung", "Makwen-infused Fish Sauce", "Dried Fennel Seed", "Phak Paem", "Vietnamese Coriander", "Damocles Tree", "Parsley", "Para Cress", "Olive"}},
+        {"Laab Khwai Khom", {"Buffalo", "Fried Garlic", "Bile", "Blood"}, {"Makwaen", "Coriander", "Nutmeg", "Star Anise", "Black Pepper", "Long Pepper", "Cinnamon", "Clove"}, {"Makwaen", "Fragrant", "Fennel Seed", "Dried Galangal", "Cardamom", "Chili Spur Pepper", "Caraway"}, {"Matoom", "KaowTong", "Oreille", "Deeplygung", "Makwen-infused Fish Sauce", "Dried Fennel Seed", "Phak Paem", "Vietnamese Coriander", "Damocles Tree", "Parsley", "Para Cress", "Olive"}},
+        {"Laab Khwai Niao", {"Buffalo", "Fried Garlic", "Blood", "Offal"}, {"Makwaen", "Coriander", "Nutmeg", "Star Anise", "Black Pepper", "Long Pepper", "Cinnamon", "Clove"}, {"Makwaen", "Fragrant", "Fennel Seed", "Dried Galangal", "Cardamom", "Chili Spur Pepper", "Caraway"}, {"Matoom", "KaowTong", "Oreille", "Deeplygung", "Makwen-infused Fish Sauce", "Dried Fennel Seed", "Phak Paem", "Vietnamese Coriander", "Damocles Tree", "Parsley", "Para Cress", "Olive"}},
+        {"Laab Khwai Khua Nam", {"Buffalo", "Fried Garlic", "Beef Broth", "Blood"}, {"Makwaen", "Coriander", "Nutmeg", "Star Anise", "Black Pepper", "Long Pepper", "Cinnamon", "Clove"}, {"Makwaen", "Fragrant", "Fennel Seed", "Dried Galangal", "Cardamom", "Chili Spur Pepper", "Caraway"}, {"Matoom", "KaowTong", "Oreille", "Deeplygung", "Makwen-infused Fish Sauce", "Dried Fennel Seed", "Phak Paem", "Vietnamese Coriander", "Damocles Tree", "Parsley", "Para Cress", "Olive"}},
+        {"Laab Mu Khua Haeng", {"Beef", "Offal", "Fried Garlic"}, {"Makwaen", "Coriander", "Nutmeg", "Star Anise", "Black Pepper", "Long Pepper", "Cinnamon", "Clove"}, {"Makwaen", "Fragrant", "Fennel Seed", "Dried Galangal", "Cardamom", "Chili Spur Pepper", "Caraway"}, {"Matoom", "KaowTong", "Oreille", "Deeplygung", "Makwen-infused Fish Sauce", "Dried Fennel Seed", "Phak Paem", "Vietnamese Coriander", "Damocles Tree", "Parsley", "Para Cress", "Olive"}},
+        {"Laab Wua Khua Nam", {"Beef", "Fried Garlic", "Beef Broth", "Blood"}, {"Makwaen", "Coriander", "Nutmeg", "Star Anise", "Black Pepper", "Long Pepper", "Cinnamon", "Clove"}, {"Makwaen", "Fragrant", "Fennel Seed", "Dried Galangal", "Cardamom", "Chili Spur Pepper", "Caraway"}, {"Matoom", "KaowTong", "Oreille", "Deeplygung", "Makwen-infused Fish Sauce", "Dried Fennel Seed", "Phak Paem", "Vietnamese Coriander", "Damocles Tree", "Parsley", "Para Cress", "Olive"}}
+    };
+
+    for (const auto& recipe : recipes) {
+        printRecipe(recipe);
+    }
+
+    return 0;
+}
