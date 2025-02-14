@@ -1,50 +1,94 @@
 #include <iostream>
-#include <chrono>
-#include <thread>
+#include <vector>
+#include <cstdlib>
+#include <ctime>
+#include <map>
 
 using namespace std;
 
-int main(){
-    cout << "1. When starting the game, the person who ate the last Laab in the group will start first.\n\n";
+// โครงสร้างสำหรับผู้เล่น
+struct Player {
+    string name;
+    vector<string> ingredients;
+    string selectedRecipe;
+};
 
-    cout << "2. When it's their turn, the players roll all 4 dice to choose and pick the ingredients according to the color they rolled.\n\n";
+// โครงสร้างส่วนผสม
+struct Ingredient {
+    string name;
+    string type;
+};
 
-    cout << "3. Dice roll results\n\n";
+// โครงสร้างสูตรลาบ
+struct LarbRecipe {
+    string name;
+    vector<string> mainIngredients;
+    vector<string> spices;
+    vector<string> herbs;
+    vector<string> specialIngredients;
+};
 
-    cout << "-If the result shows 2 or more of the same color, the player must pick 1 event card. Near the picking of the ingredient coin, the event card will show the result immediately after picking.\n\n";
+// สูตรลาบพร้อมส่วนผสมที่ต้องใช้
+vector<LarbRecipe> recipes = {
+    {"Laab Wua Khom", {"Beef", "Fried garlic", "Bile", "Blood"}, {"Makwaen", "Coriander", "Nutmeg", "Star Anise", "Black Pepper", "Long Pepper", "Cinnamon", "Clove"}, {"Makwaen", "Fragrant", "Fennel Seed", "Dried Galangal", "Cardamom", "Chili Spur Pepper", "Caraway"}, {"KaowTong", "Parsley", "Vietnamese Coriander"}},
+    {"Laab Lor", {"Beef", "Buffalo", "Fried Garlic", "Blood", "Offal"}, {"Makwaen", "Coriander", "Nutmeg", "Star Anise", "Black Pepper", "Long Pepper", "Cinnamon", "Clove"}, {"Makwaen", "Fragrant", "Fennel Seed", "Dried Galangal", "Cardamom", "Chili Spur Pepper", "Caraway"}, {"Matoom", "Phak Paem", "Dried Fennel Seed"}},
+    {"Laab Mi", {"Fried Garlic", "Blood", "Offal"}, {"Makwaen", "Coriander", "Nutmeg", "Star Anise", "Black Pepper", "Long Pepper", "Cinnamon", "Clove"}, {"Makwaen", "Fragrant", "Fennel Seed", "Dried Galangal", "Cardamom", "Chili Spur Pepper", "Caraway"}, {"Deeplygung", "Makwen-infused Fish Sauce", "Para Cress", "Olive"}},
+    {"Laab Wua Niao", {"Beef", "Fried Garlic", "Blood", "Offal"}, {"Makwaen", "Coriander", "Nutmeg", "Star Anise", "Black Pepper", "Long Pepper", "Cinnamon", "Clove"}, {"Makwaen", "Fragrant", "Fennel Seed", "Dried Galangal", "Cardamom", "Chili Spur Pepper", "Caraway"}, {"Makwen-infused Fish Sauce", "Damocles Tree", "Para Cress"}},
+};
 
-    cout << "4. If the player has received all the ingredients of that color as desired, the player can choose to pick ingredients from other colors instead.\n\n";
+// รายการส่วนผสมแบ่งตามประเภท
+vector<Ingredient> meats = {
+    {"Beef", "meat"}, {"Pork", "meat"}, {"Beef broth", "meat"}, {"Fried garlic", "meat"},
+    {"Buffalo", "meat"}, {"Bile", "meat"}, {"Blood", "meat"}, {"Offal", "meat"}
+};
 
-    cout << "5. End of the game The player who receives all the ingredients according to the Laab recipe first will be the winner. And you are the\n\n";
+vector<Ingredient> herbs = {
+    {"Makwaen", "herb"}, {"Coriander", "herb"}, {"Nutmeg", "herb"}, {"Star Anise", "herb"},
+    {"Black pepper", "herb"}, {"Long pepper", "herb"}, {"Cinnamon", "herb"}, {"Clove", "herb"}
+};
 
-    cout << "REAL_Laab_gangster\n\n";
+vector<Ingredient> vegetables = {
+    {"Matoom", "vegetable"}, {"KaowTong", "vegetable"}, {"Oreille", "vegetable"}, {"Deeplygung", "vegetable"},
+    {"Makwen-infused fish sauce", "vegetable"}, {"Dried Fennel Seed", "vegetable"}, {"Phak paem", "vegetable"},
+    {"Vietnamese Coriander", "vegetable"}, {"Damocles tree", "vegetable"}, {"Parsley", "vegetable"},
+    {"Para cress", "vegetable"}, {"Olive", "vegetable"}
+};
 
+vector<Ingredient> spices = {
+    {"Makwaen", "spice"}, {"Fragrant", "spice"}, {"Fennel Seed", "spice"}, {"Dried Galangal", "spice"},
+    {"Cardamom", "spice"}, {"Chili Spur Pepper", "spice"}, {"Caraway", "spice"}
+};
+
+// ฟังก์ชันสุ่มสูตรลาบ
+LarbRecipe drawLarbRecipe() {
+    return recipes[rand() % recipes.size()];
+}
+
+int main() {
+    srand(time(0));
     int numPlayers;
-    cout << "Enter your number of player(not more than 4) : ";
-    cout << endl;
-    cin >> numPlayers;
-    while(numPlayers>4 || numPlayers<2){
-        cout << "Sorry. the number of player exceeded the limit.\n";
-        cout << "Enter your number agian : ";
+    
+    // รับจำนวนผู้เล่น
+    do {
+        cout << "Enter number of players (max 4): ";
         cin >> numPlayers;
-        cout << endl;
+        if (numPlayers > 4) {
+            cout << "Too many players! Please enter again.\n";
+        }
+    } while (numPlayers > 4);
+    
+    vector<Player> players(numPlayers);
+    
+    // ตั้งค่าผู้เล่น
+    for (int i = 0; i < numPlayers; i++) {
+        cout << "Enter player " << i + 1 << " name: ";
+        cin >> players[i].name;
+        
+        // สุ่มสูตรลาบให้ผู้เล่น
+        LarbRecipe recipe = drawLarbRecipe();
+        players[i].selectedRecipe = recipe.name;
+        cout << players[i].name << " received recipe: " << players[i].selectedRecipe << "\n";
     }
-
-    string colors[] = {
-        "\033[31m", // สีแดง
-        "\033[32m", // สีเขียว
-        "\033[33m", // สีเหลือง
-        "\033[34m", // สีน้ำเงิน
-        "\033[35m", // สีม่วง
-        "\033[36m", // สีฟ้า
-        "\033[37m", // สีขาว
-    };
-
-    for (int i = 0; i < 15; i++) {
-        cout << colors[i % 7] << "||" << flush;
-        this_thread::sleep_for(std::chrono::seconds(1));
-    }
-    cout << "\033[0m" << endl;
-
+    
     return 0;
 }
