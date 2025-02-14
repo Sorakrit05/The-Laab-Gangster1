@@ -12,7 +12,6 @@ struct Ingredient {
 vector<Ingredient> meats = {
     {"Beef", "meat"},
     {"Pork", "meat"},
-    {"Chicken", "meat"},
     {"Beef broth", "meat"},
     {"Fried garlic", "meat"},
     {"Buffalo", "meat"},
