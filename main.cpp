@@ -4,6 +4,7 @@
 #include <ctime>
 #include <map>
 #include <algorithm>
+#include <iomanip>
 using namespace std;
 
 
@@ -87,19 +88,21 @@ void printIngredient(vector<string> Ingredient){
 }
 //แสดงสูตรลาบ และส่วนผสม
 void printRecipe(const LarbRecipe& recipe) {
-    cout << "Recipe: " << recipe.name << endl;
-    cout << "Meats: ";
+    cout << endl;
+    cout << left << setw(20) << "Category" << setw(60) << "Ingredients" << endl;
+    cout << "------------------------------------------------------------------------------------------------------" << endl;
+    cout << setw(20) << "Meats: ";
     printIngredient(recipe.mainIngredients);
     cout << endl;
-    cout << "Spices: ";
+    cout << setw(20) << "Spices: " ;
     printIngredient(recipe.spices);
     cout << endl;
-    cout << "Herbs: ";
+    cout << setw(20) << "Herbs: " ;
     printIngredient(recipe.herbs);
     cout << endl;
-    cout << "Vegetables: ";
+    cout << setw(20) << "Vegetables: " ;
     printIngredient(recipe.specialIngredients);
-    cout << endl << "\n----------------------\n" << endl;
+    cout << "\n------------------------------------------------------------------------------------------------------\n" << "\n\n\n";
 }
 
 //ฟังก์ชันทอยลูกเต๋า
@@ -235,6 +238,16 @@ void shownPlayerItem(Player player){
     cout << "Vetgetables: " << player.specialIngredients << "(want more: " <<  player.recipe.specialIngredients.size() - player.specialIngredients << " )" << endl;
 }
 
+bool isNameUnique(const vector<Player>& players, const string& name) {
+    for (const auto& player : players) {
+        if (player.name == name) {
+            return false; // ถ้าชื่อซ้ำจะส่งค่าผลลัพธ์เป็น false
+        }
+    }
+    return true; // ถ้าชื่อไม่ซ้ำ
+}
+
+
 int main() {
     srand(time(0));
     int numPlayers;
@@ -253,12 +266,24 @@ int main() {
     
     vector<Player> players(numPlayers);
     
-    // ตั้งค่าผู้เล่น
+   // ตั้งค่าผู้เล่น
+    cin.ignore(); // กำจัดบรรทัดที่ค้างจากการรับค่า numPlayers
     for (int i = 0; i < numPlayers; i++) {
-        cout << "Enter player " << i + 1 << " name: ";
-        cin >> players[i].name;
+        string playerName;
+        bool uniqueName = false;
         
-     
+        // ตรวจสอบชื่อผู้เล่น
+        while (!uniqueName) {
+            cout << "Enter player " << i + 1 << " name: ";
+            getline(cin, playerName); // ใช้ getline เพื่อรับชื่อที่มีช่องว่าง
+            
+            if (isNameUnique(players, playerName)) {
+                players[i].name = playerName; // ถ้าชื่อไม่ซ้ำก็เก็บ
+                uniqueName = true;
+            } else {
+                cout << "Name already taken. Please choose a different name.\n";
+            }
+        }
     }
     cout << endl;
     
@@ -266,7 +291,7 @@ int main() {
     for (int i = 0; i < numPlayers; i++) {
     LarbRecipe recipe = drawLarbRecipe();
         players[i].recipe = recipe;
-        cout << players[i].name << " received recipe: " << players[i].recipe.name << "\n";
+        cout << players[i].name << " Received recipe: " << players[i].recipe.name << "\n";
         printRecipe(recipe);
     }
     int i = 0;
