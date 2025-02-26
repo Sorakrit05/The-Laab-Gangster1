@@ -5,6 +5,8 @@
 #include <map>
 #include <algorithm>
 #include <iomanip>
+#include <chrono>
+#include <thread>
 using namespace std;
 
 
@@ -57,7 +59,7 @@ vector<Ingredient> meats = {
 
 vector<Ingredient> herbs = {
     {"Makwaen", "herb"}, {"Coriander", "herb"}, {"Nutmeg", "herb"}, {"Star Anise", "herb"},
-    {"Black pepper", "herb"}, {"Long pepper", "herb"}, {"Cinnamon", "herb"}, {"Clove", "herb"}
+    {"Black Pepper", "herb"}, {"Long Pepper", "herb"}, {"Cinnamon", "herb"}, {"Clove", "herb"}
 };
 
 vector<Ingredient> vegetables = {
@@ -102,117 +104,181 @@ void printRecipe(const LarbRecipe& recipe) {
     cout << endl;
     cout << setw(20) << "Vegetables: " ;
     printIngredient(recipe.specialIngredients);
-    cout << "\n------------------------------------------------------------------------------------------------------\n" << "\n\n\n";
+    cout << "\n------------------------------------------------------------------------------------------------------\n" << "\n";
 }
-
 //ฟังก์ชันทอยลูกเต๋า
-vector<string> rollFourSideDice(){
+vector<string> rollFourSideDice() {
     vector<string> resultsColour;
-    srand(time(0));
-    string Colors[] = {"Red","Brown","Orange","Green"};
+    string Colors[] = {"Red", "Brown", "Orange", "Green"};
+
+    cout << "The dice are rolling... ";
+    cout.flush();
+
+    // Simulate dice rolling animation
+    for (int i = 0; i < 5; ++i) {
+        cout << ". ";
+        cout.flush();
+        this_thread::sleep_for(chrono::milliseconds(300));
+    }
+    cout << "Done!" << endl;
+    this_thread::sleep_for(chrono::milliseconds(500));
 
     cout << "The results of the dice roll:  ";
-    for (int i = 0; i < 4; i++){
+    for (int i = 0; i < 4; i++) {
         int roll = (rand() % 4);
-        cout << Colors[roll] << " "; 
+        cout << Colors[roll] << " ";
         resultsColour.push_back(Colors[roll]);
+        this_thread::sleep_for(chrono::milliseconds(250));
     }
     cout << endl;
-    
-    sort(resultsColour.begin(),resultsColour.end());
+
+    sort(resultsColour.begin(), resultsColour.end());
     vector<string>::iterator uniqueColour;
-    uniqueColour = unique(resultsColour.begin(),resultsColour.end());
-    resultsColour.resize(distance(resultsColour.begin(),uniqueColour));
+    uniqueColour = unique(resultsColour.begin(), resultsColour.end());
+    resultsColour.resize(distance(resultsColour.begin(), uniqueColour));
     return resultsColour;
 }
 
 Player drawFortuneCard(Player player) {
     vector<string> cards = {"Suan Krua", "Moitgure", "Regular Customer", "Moldy Cutting Board", "The Kitchen", "Rainy Season", "Falling Mortar", "Falling Tray"};
-    
+
     int randomCards = rand() % cards.size(); // สุ่มดัชนีการ์ด
     string selectedCard = cards[randomCards]; // เก็บการ์ดที่สุ่มได้
 
-    cout << "Gangster's Fortune Card: " << selectedCard << endl;
-
+    // Determine the card text based on the selected card
+    string cardText;
     if (selectedCard == "Suan Krua") {
-        cout << "Many of the spices in Chili Laap are found in Lanna gardens and today you have the opportunity to visit that garden and pick up the brown spices you want.\n";
-        player.herbs++;
-        if(player.herbs >= player.recipe.herbs.size()){
-            player.herbs--;
-            if(player.mainIngredients < player.recipe.mainIngredients.size()){
-                player.mainIngredients++;
-            }else if(player.spices < player.recipe.spices.size()){
-                player.spices++;
-            }else if(player.specialIngredients < player.recipe.specialIngredients.size()){
-                player.specialIngredients++;
-            }
-        }
+        cardText = "Many of the spices in Chili Laap are found in Lanna gardens and today you have the opportunity to visit that garden and pick up the brown spices you want.";
     } else if (selectedCard == "Moitgure") {
-        cout << "Good chili paste is dry. Moisture causes chili paste to clump and mold. Your spices have moisture that will ruin your chili paste. Pick up 1 brown spice and return it to the center pile.\n";
-        player.herbs--;
-        if(player.herbs < 0){
-            player.herbs++;
-        }
+        cardText = "Good chili paste is dry. Moisture causes chili paste to clump and mold. Your spices have moisture that will ruin your chili paste. Pick up 1 brown spice and return it to the center pile.";
     } else if (selectedCard == "Regular Customer") {
-        cout << "Being a regular at the butcher shop gives you the chance to choose quality meat before anyone else. Pick up one of the red tokens.\n";
-        player.mainIngredients++;
-        if(player.mainIngredients >= player.recipe.mainIngredients.size()){
-            player.mainIngredients--;
-            if(player.spices < player.recipe.spices.size()){
-                player.spices++;
-            }else if(player.herbs < player.recipe.herbs.size()){
-                player.herbs++;
-            }else if(player.specialIngredients < player.recipe.specialIngredients.size()){
-                player.specialIngredients++;
-            }
-        }
+        cardText = "Being a regular at the butcher shop gives you the chance to choose quality meat before anyone else. Pick up one of the red tokens.";
     } else if (selectedCard == "Moldy Cutting Board") {
-        cout << "The cutting board for making larb must be dry and clean. Failure to store the cutting board causes mold and damages the meat. Pick up 1 red poden. Return to the center pile.\n";
-        player.mainIngredients--;
-        if(player.mainIngredients < 0){
-            player.mainIngredients++;
-        }
+        cardText = "The cutting board for making larb must be dry and clean. Failure to store the cutting board causes mold and damages the meat. Pick up 1 red poden. Return to the center pile.";
     } else if (selectedCard == "The Kitchen") {
-        cout << "Many of the spices in chili paste are found in the kitchen garden. Just pick up one orange spice of your choice.\n";
-        player.spices++;
-        if(player.spices >= player.recipe.spices.size()){
-            player.spices--;
-            if(player.mainIngredients < player.recipe.mainIngredients.size()){
+        cardText = "Many of the spices in chili paste are found in the kitchen garden. Just pick up one orange spice of your choice.";
+    } else if (selectedCard == "Rainy Season") {
+        cardText = "The humid rainy season brings forth many kinds of vegetables that are perfect for eating with laab. Pick up any green token you want.";
+    } else if (selectedCard == "Falling Mortar") {
+        cardText = "Mortar is a tool used to finely pound spices and turn them into chili paste. Your mortar spoiled the prepared spices. Pick up 1 orange spice and return it to the center pile.";
+    } else if (selectedCard == "Falling Tray") {
+        cardText = "You prepared the vegetables and the laab well, but unfortunately you made 1 piece of green yin poden tray back to the center.";
+    }
+
+    // Calculate frame dimensions
+    int cardWidth = 70; // Adjust as needed
+    int textPadding = 5; // Adjust as needed
+    int namePadding = (cardWidth - selectedCard.length()) / 2;
+    
+    // Draw the top border
+    cout << "+" << string(cardWidth - 2, '-') << " +" << endl;
+    
+    //print card name
+    cout << "| " << setw(namePadding) << "" << selectedCard << setw(namePadding) << "" << "|" << endl;
+    
+    // Draw the card text within the frame
+    int currentLineStart = 0;
+    while (currentLineStart < cardText.length()) {
+        int currentLineLength = cardWidth - (2 + 2 * textPadding); // Minus 2 for the '|' on each side, minus padding
+        string currentLine = cardText.substr(currentLineStart, currentLineLength);
+         int Padding = (cardWidth - 2 - currentLine.length())/2;
+        cout << "| " << setw(textPadding) << "" <<  left << setw(currentLineLength) << currentLine << setw(textPadding) << "" << " |" << endl;
+        currentLineStart += currentLineLength;
+    }
+
+    // Draw the bottom border
+    cout << "+" << string(cardWidth - 2, '-') << " +" << endl;
+    cout << endl;
+    
+    if (selectedCard == "Suan Krua") {
+        player.herbs++;
+        if (player.herbs > player.recipe.herbs.size()) {
+            player.herbs--; // Remove the extra one
+
+            // Distribute to other categories if available
+            if (player.mainIngredients < player.recipe.mainIngredients.size()) {
                 player.mainIngredients++;
-            }else if(player.herbs < player.recipe.herbs.size()){
-                player.herbs++;
-            }else if(player.specialIngredients < player.recipe.specialIngredients.size()){
+            }
+            else if (player.spices < player.recipe.spices.size()) {
+                player.spices++;
+            }
+            else if (player.specialIngredients < player.recipe.specialIngredients.size()) {
                 player.specialIngredients++;
             }
         }
-    } else if (selectedCard == "Rainy Season") {
-        cout << "The humid rainy season brings forth many kinds of vegetables that are perfect for eating with laab. Pick up any green token you want.\n";
-        player.specialIngredients++;
-        if(player.specialIngredients >= player.recipe.specialIngredients.size()){
-            player.specialIngredients--;
-            if(player.mainIngredients < player.recipe.mainIngredients.size()){
-                player.mainIngredients++;
-            }else if(player.spices < player.recipe.spices.size()){
+    }
+    else if (selectedCard == "Moitgure") {
+        player.herbs--;
+        if (player.herbs < 0) {
+            player.herbs = 0;
+        }
+    }
+    else if (selectedCard == "Regular Customer") {
+        player.mainIngredients++;
+        if (player.mainIngredients > player.recipe.mainIngredients.size()) {
+             player.mainIngredients--;
+            if (player.spices < player.recipe.spices.size()) {
                 player.spices++;
-            }else if(player.herbs < player.recipe.herbs.size()){
+            }
+            else if (player.herbs < player.recipe.herbs.size()) {
+                player.herbs++;
+            }
+            else if (player.specialIngredients < player.recipe.specialIngredients.size()) {
+                player.specialIngredients++;
+            }
+        }
+    }
+    else if (selectedCard == "Moldy Cutting Board") {
+        player.mainIngredients--;
+        if (player.mainIngredients < 0) {
+            player.mainIngredients = 0;
+        }
+    }
+    else if (selectedCard == "The Kitchen") {
+        player.spices++;
+        if (player.spices > player.recipe.spices.size()) {
+            player.spices--;
+            if (player.mainIngredients < player.recipe.mainIngredients.size()) {
+                player.mainIngredients++;
+            }
+            else if (player.herbs < player.recipe.herbs.size()) {
+                player.herbs++;
+            }
+            else if (player.specialIngredients < player.recipe.specialIngredients.size()) {
+                player.specialIngredients++;
+            }
+        }
+    }
+    else if (selectedCard == "Rainy Season") {
+        player.specialIngredients++;
+        if (player.specialIngredients > player.recipe.specialIngredients.size()) {
+            player.specialIngredients--;
+             if (player.mainIngredients < player.recipe.mainIngredients.size()) {
+                player.mainIngredients++;
+            }
+            else if (player.spices < player.recipe.spices.size()) {
+                player.spices++;
+            }
+            else if (player.herbs < player.recipe.herbs.size()) {
                 player.herbs++;
             }
         }
-    } else if (selectedCard == "Falling Mortar") {
-        cout << "Mortar is a tool used to finely pound spices and turn them into chili paste. Your mortar spoiled the prepared spices. Pick up 1 orange spice and return it to the center pile.\n";
+    }
+    else if (selectedCard == "Falling Mortar") {
         player.spices--;
-        if(player.spices < 0){
-            player.spices++;
+        if (player.spices < 0) {
+            player.spices = 0;
         }
-    } else if(selectedCard == "Falling Tray") {
-        cout << "You prepared the vegetables and the laab well, but unfortunately you made 1 piece of green yin poden tray back to the center.\n";
+    }
+    else if (selectedCard == "Falling Tray") {
         player.specialIngredients--;
-        if(player.specialIngredients < 0){
-            player.specialIngredients++;
+        if (player.specialIngredients < 0) {
+            player.specialIngredients = 0;
         }
     }
     return player;
 }
+
 
 bool Winner(Player player){
     if(player.mainIngredients < player.recipe.mainIngredients.size()){
@@ -230,23 +296,19 @@ bool Winner(Player player){
     return true;
 }
 
-void shownPlayerItem(Player player){
-    cout << "**Item inventory**" << endl;
-    cout << "Meats: " << player.mainIngredients << "(want more: " <<  player.recipe.mainIngredients.size() - player.mainIngredients << " )" << endl;
-    cout << "Spices: " << player.spices << "(want more: " <<  player.recipe.spices.size() - player.spices << " )" << endl;
-    cout << "Herbs: " << player.herbs << "(want more: " <<  player.recipe.herbs.size() - player.herbs << " )" << endl;
-    cout << "Vetgetables: " << player.specialIngredients << "(want more: " <<  player.recipe.specialIngredients.size() - player.specialIngredients << " )" << endl;
+void shownPlayerItem(Player player) {
+    cout << setw(50) << setfill('-') << "-" << endl;
+    cout << setfill(' ');
+    cout << "| " << setw(15) << left << "Category" << "| " << setw(10) << "Amount" << "| " << setw(15) << "Want More" << "|" << endl;
+    cout << setw(50) << setfill('-') << "-" << endl;
+    cout << setfill(' ');
+    cout << "| " << setw(15) << left << "Meats" << "| " << setw(10) << player.mainIngredients << "| " << setw(15) << player.recipe.mainIngredients.size() - player.mainIngredients << "|" << endl;
+    cout << "| " << setw(15) << left << "Spices" << "| " << setw(10) << player.spices << "| " << setw(15) << player.recipe.spices.size() - player.spices << "|" << endl;
+    cout << "| " << setw(15) << left << "Herbs" << "| " << setw(10) << player.herbs << "| " << setw(15) << player.recipe.herbs.size() - player.herbs << "|" << endl;
+    cout << "| " << setw(15) << left << "Vegetables" << "| " << setw(10) << player.specialIngredients << "| " << setw(15) << player.recipe.specialIngredients.size() - player.specialIngredients << "|" << endl;
+    cout << setw(50) << setfill('-') << "-" << endl;
+    cout << setfill(' ');
 }
-
-bool isNameUnique(const vector<Player>& players, const string& name) {
-    for (const auto& player : players) {
-        if (player.name == name) {
-            return false; // ถ้าชื่อซ้ำจะส่งค่าผลลัพธ์เป็น false
-        }
-    }
-    return true; // ถ้าชื่อไม่ซ้ำ
-}
-
 
 int main() {
     srand(time(0));
@@ -254,7 +316,17 @@ int main() {
     
     // รับจำนวนผู้เล่น
     do {
-        cout << "Enter number of players (max 4): ";
+        cout << endl;
+        cout << "* * * * * * * * * * * * * * * * * * * * * *" << endl;
+        cout << "*       +--------------------------+      *" << endl;
+        cout << "*       | Choose number of players |      *" << endl;
+        cout << "*       +--------------------------+      *" << endl;
+        cout << "*                                         *" << endl;
+        cout << "*  [2 players] " << " [3 players] " << " [4 players]  *" << endl;
+        cout << "*                                         *" << endl;
+        cout << "* * * * * * * * * * * * * * * * * * * * * *" << endl;
+
+        cout << endl << "\n      !! Players in this round : ";
         cin >> numPlayers;
         if (numPlayers > 4) {
             cout << "Too many players! Please enter again.\n";
@@ -266,33 +338,30 @@ int main() {
     
     vector<Player> players(numPlayers);
     
-   // ตั้งค่าผู้เล่น
-    cin.ignore(); // กำจัดบรรทัดที่ค้างจากการรับค่า numPlayers
-    for (int i = 0; i < numPlayers; i++) {
-        string playerName;
-        bool uniqueName = false;
-        
-        // ตรวจสอบชื่อผู้เล่น
-        while (!uniqueName) {
-            cout << "Enter player " << i + 1 << " name: ";
-            getline(cin, playerName); // ใช้ getline เพื่อรับชื่อที่มีช่องว่าง
-            
-            if (isNameUnique(players, playerName)) {
-                players[i].name = playerName; // ถ้าชื่อไม่ซ้ำก็เก็บ
-                uniqueName = true;
-            } else {
-                cout << "Name already taken. Please choose a different name.\n";
-            }
-        }
-    }
-    cout << endl;
+    // ตั้งค่าผู้เล่น
+    cout << "\n------------------------------------------" << endl;
+    cout << endl << "      [Member Player in this round] " << endl;
     
+    for (int i = 0; i < numPlayers; i++) {
+        cout << endl;
+        cout << " Enter player " << i + 1 << " name: ";
+        cin >> players[i].name;
+     
+    }
+    cout << "\n------------------------------------------\n\n" << endl;
+    cout << endl;
+    cin.get();
     // สุ่มสูตรลาบ
     for (int i = 0; i < numPlayers; i++) {
     LarbRecipe recipe = drawLarbRecipe();
+        cout << "=======================================================================================================\n" << endl;
+        cout << players[i].name << "!!  Get your recipe";
+        cin.get();
         players[i].recipe = recipe;
-        cout << players[i].name << " Received recipe: " << players[i].recipe.name << "\n";
+        cout << "received recipe: " << players[i].recipe.name << "\n";
         printRecipe(recipe);
+        shownPlayerItem(players[i]);
+        cout << "\n=======================================================================================================\n\n" << endl;
     }
     int i = 0;
     while(true){
@@ -303,6 +372,7 @@ int main() {
         vector<string> resultsColour = rollFourSideDice();
 
         if(resultsColour.size() == 4){
+            cout << endl;
             cout << "You get the ingrediant!!!";
             for(int j = 4; j > 0; j--){
              if(players[i].mainIngredients < players[i].recipe.mainIngredients.size()){
@@ -332,15 +402,21 @@ int main() {
 
         //เรียกใช้การ์ดดวง
         }else{
-        players[i] = drawFortuneCard(players[i]);
-        cout << endl;
+            cout << endl;
+            cout << "You must randomly draw a fortune card.!!!" << endl;
+            cout << "Press [Enter] for to randomly select a card.\n";
+            cin.get();
+            players[i] = drawFortuneCard(players[i]);
+            cout << endl;
         }
+        
+        cout << endl;
 
         if(Winner(players[i])){
             cout << "The winner is " << players[i].name;
             break;
         }
-
+        cout << endl;
         shownPlayerItem(players[i]);
         i++;
         if(i >= numPlayers){
