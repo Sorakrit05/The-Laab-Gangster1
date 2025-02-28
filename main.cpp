@@ -7,6 +7,8 @@
 #include <iomanip>
 #include <chrono>
 #include <thread>
+#include <set>
+#include <limits>
 using namespace std;
 
 
@@ -132,10 +134,6 @@ vector<string> rollFourSideDice() {
     }
     cout << endl;
 
-    sort(resultsColour.begin(), resultsColour.end());
-    vector<string>::iterator uniqueColour;
-    uniqueColour = unique(resultsColour.begin(), resultsColour.end());
-    resultsColour.resize(distance(resultsColour.begin(), uniqueColour));
     return resultsColour;
 }
 
@@ -310,6 +308,101 @@ void shownPlayerItem(Player player) {
     cout << setfill(' ');
 }
 
+// ฟังก์ชันคืนค่ารายการสีที่ออกเพียงครั้งเดียว
+vector<string> getUniqueColors(const vector<string>& resultsColour) {
+    unordered_map<string, int> colorFrequency;
+    unordered_map<string, int> colorCount;
+
+    // นับจำนวนครั้งที่สีแต่ละสีปรากฏขึ้น
+    for (const string& color : resultsColour) {
+        colorFrequency[color]++;
+    }
+
+    // กำหนดค่า 1 ถ้าสีไม่ซ้ำ และ 0 ถ้าสีซ้ำ
+    for (const string& color : resultsColour) {
+        if (colorFrequency[color] == 1) {
+            colorCount[color] = 1;
+        } else {
+            colorCount[color] = 0;
+        }
+    }
+
+
+    // เก็บสีที่ออกแค่ครั้งเดียวลง vector
+    vector<string> uniqueColors;
+    for (const string& color : resultsColour) {  
+        if (colorCount[color] != 0) {  // เฉพาะสีที่เจอครั้งเดียว
+            uniqueColors.push_back(color);
+        }
+    }
+    return uniqueColors;
+}
+
+void inputIngredientsByColor(Player& player, const vector<string>& colors) {
+    // หาสีที่ออกมาแค่ครั้งเดียว
+    vector<string> uniqueColors = getUniqueColors(colors);
+
+    // แสดงสีที่มีให้เลือก
+    cout << "DEBUG: สีที่ไม่ซ้ำกัน:\n";
+    for (const string& color : uniqueColors) {
+        cout << color << endl;
+    }
+
+    // เลือกส่วนผสมตามสีที่ไม่ซ้ำ
+    for (const string& color : uniqueColors) {
+        cout << "กรุณาใส่ส่วนผสมสำหรับสี " << color << ":" << endl;
+        string ingredient;
+        bool valid = false;
+
+        while (!valid) {
+            cout << "เลือกหมายเลขส่วนผสม: ";
+            int index;
+            cin >> index;
+
+            if (cin.fail()) {
+                cin.clear();
+                cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                cout << "กรุณาใส่หมายเลขที่ถูกต้อง\n";
+                continue;
+            }
+
+            // ตรวจสอบและเลือกส่วนผสมตามประเภทสี
+            if (color == "Red" && index > 0 && index <= player.recipe.mainIngredients.size()) {
+                ingredient = player.recipe.mainIngredients[index - 1];
+                player.mainIngredients++;
+                valid = true;
+            } else if (color == "Brown" && index > 0 && index <= player.recipe.herbs.size()) {
+                ingredient = player.recipe.herbs[index - 1];
+                valid = true;
+            } else if (color == "Orange" && index > 0 && index <= player.recipe.spices.size()) {
+                ingredient = player.recipe.spices[index - 1];
+                valid = true;
+            } else if (color == "Green" && index > 0 && index <= player.recipe.specialIngredients.size()) {
+                ingredient = player.recipe.specialIngredients[index - 1];
+                valid = true;
+            } else {
+                cout << "หมายเลขส่วนผสมไม่ถูกต้อง กรุณาลองใหม่\n";
+            }
+        }
+
+        // บันทึกส่วนผสมที่เลือกลง Player
+        player.ingredients.push_back(ingredient);
+    }
+}
+
+bool checkIngredients(const Player& player) {
+    set<string> requiredIngredients(player.recipe.mainIngredients.begin(), player.recipe.mainIngredients.end());
+    requiredIngredients.insert(player.recipe.spices.begin(), player.recipe.spices.end());
+    requiredIngredients.insert(player.recipe.herbs.begin(), player.recipe.herbs.end());
+    requiredIngredients.insert(player.recipe.specialIngredients.begin(), player.recipe.specialIngredients.end());
+
+    for (const string& ingredient : player.ingredients) {
+        requiredIngredients.erase(ingredient);
+    }
+
+    return requiredIngredients.empty();
+}
+
 int main() {
     srand(time(0));
     int numPlayers;
@@ -317,14 +410,14 @@ int main() {
     // รับจำนวนผู้เล่น
     do {
         cout << endl;
-        cout << "* * * * * * * * * * * * * * * * * * * * * *" << endl;
-        cout << "*       +--------------------------+      *" << endl;
-        cout << "*       | Choose number of players |      *" << endl;
-        cout << "*       +--------------------------+      *" << endl;
-        cout << "*                                         *" << endl;
-        cout << "*  [2 players] " << " [3 players] " << " [4 players]  *" << endl;
-        cout << "*                                         *" << endl;
-        cout << "* * * * * * * * * * * * * * * * * * * * * *" << endl;
+        cout << "\033[31m* * * * * * * * * * * * * * * * * * * * *\033[0m" << endl;
+        cout << "\033[31m*\033[0m" << "     +--------------------------+      " << "\033[31m*\033[0m" << endl;
+        cout << "\033[31m*\033[0m" << "     | Choose number of players |      " << "\033[31m*\033[0m" << endl;
+        cout << "\033[31m*\033[0m" << "     +--------------------------+      " << "\033[31m*\033[0m" << endl;
+        cout << "\033[31m*\033[0m" << "                                       " << "\033[31m*\033[0m" << endl;
+        cout << "\033[31m*\033[0m" << " [\033[1;32m2\033[0m" << " players]  " << "[\033[1;32m3\033[0m"<<" players]  " <<"[\033[1;32m4\033[0m"<<" players] " << "\033[31m*\\033[0m" << endl;
+        cout << "\033[31m*\\033[0m" << "                                       " << "\033[31m*\\033[0m" << endl;
+        cout << "\033[31m* * * * * * * * * * * * * * * * * * * * * \033[0m" << endl;
 
         cout << endl << "\n      !! Players in this round : ";
         cin >> numPlayers;
@@ -333,6 +426,11 @@ int main() {
         }
         if (numPlayers < 2) {
             cout << "Not enough players! Please enter again.\n";
+        }
+        if (cin.fail()) {
+            cin.clear(); // ล้างสถานะผิดพลาด
+            cin.ignore(numeric_limits<streamsize>::max(), '\n'); // ลบข้อมูลที่ไม่ใช่ตัวเลขใน buffer
+            cout << "Invalid input. Please enter again.\n";
         }
     } while (numPlayers > 4 || numPlayers < 2);
     
@@ -355,7 +453,7 @@ int main() {
     for (int i = 0; i < numPlayers; i++) {
     LarbRecipe recipe = drawLarbRecipe();
         cout << "=======================================================================================================\n" << endl;
-        cout << players[i].name << "!!  Get your recipe";
+        cout << players[i].name << "!!  Get your recipe [Enter]";
         cin.get();
         players[i].recipe = recipe;
         cout << "received recipe: " << players[i].recipe.name << "\n";
@@ -365,54 +463,31 @@ int main() {
     }
     int i = 0;
     while(true){
-        cin.ignore();
-        cout << "This is your turn:" <<  players[i].name << endl;
+        cout << "This is your turn: " <<  players[i].name << endl;
         cout << "Press [Enter] for roll dice";
         cin.get();
         vector<string> resultsColour = rollFourSideDice();
+        vector<string> uniqueColors = getUniqueColors(resultsColour);
 
-        if(resultsColour.size() == 4){
+        if(uniqueColors.size() == 4){
             cout << endl;
-            cout << "You get the ingrediant!!!";
-            for(int j = 4; j > 0; j--){
-             if(players[i].mainIngredients < players[i].recipe.mainIngredients.size()){
-                players[i].mainIngredients++; 
-                j--;
-                if(j == 0) break;
-
-            }
-             if(players[i].spices < players[i].recipe.spices.size()){
-                players[i].spices++; 
-                j--;
-                if(j == 0) break;
-            }
-              if(players[i].herbs < players[i].recipe.herbs.size()){
-                players[i].herbs++; 
-                j--;
-                if(j == 0) break;
-            }
-             if(players[i].specialIngredients < players[i].recipe.specialIngredients.size()){
-                players[i].specialIngredients++; 
-                j--;
-                if(j == 0) break;
-            }
+            printRecipe(players[i].recipe);
+            inputIngredientsByColor(players[i], resultsColour); // ให้ผู้เล่นพิมพ์ส่วนผสมเองตามสีที่ได้
             cout << endl;
-        }
-        
-
-        //เรียกใช้การ์ดดวง
-        }else{
+        } else {
             cout << endl;
             cout << "You must randomly draw a fortune card.!!!" << endl;
             cout << "Press [Enter] for to randomly select a card.\n";
             cin.get();
             players[i] = drawFortuneCard(players[i]);
             cout << endl;
+            printRecipe(players[i].recipe);
+            inputIngredientsByColor(players[i], resultsColour); // ให้ผู้เล่นพิมพ์ส่วนผสมเองตามสีที่ได้
         }
         
         cout << endl;
 
-        if(Winner(players[i])){
+        if(checkIngredients(players[i])){
             cout << "The winner is " << players[i].name;
             break;
         }
@@ -423,5 +498,5 @@ int main() {
             i = 0;
         }
     }
-        return 0;
+    return 0;
 }
