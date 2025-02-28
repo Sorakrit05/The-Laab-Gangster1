@@ -9,9 +9,9 @@
 #include <thread>
 #include <set>
 #include <limits>
+#include <unordered_map>
+#include <string>
 using namespace std;
-
-
 
 // โครงสร้างส่วนผสม
 struct Ingredient {
@@ -28,6 +28,10 @@ struct LarbRecipe {
     vector<string> specialIngredients;
 };
 
+struct Card {
+    string name;
+    string description;
+};
 // โครงสร้างสำหรับผู้เล่น
 struct Player {
     string name;
@@ -40,17 +44,21 @@ struct Player {
 
 };
 
+struct IngredientInventory {
+    map<string, int> inventory; // map ingredients names with its count
+};
+
 // สูตรลาบพร้อมส่วนผสมที่ต้องใช้
 vector<LarbRecipe> recipes = {
-        {"Laab Wua Khom", {"Beef", "Fried garlic", "Bile", "Blood"}, {"Makwaen", "Coriander", "Nutmeg", "Star Anise", "Black Pepper", "Long Pepper", "Cinnamon", "Clove"}, {"Makwaen", "Fragrant", "Fennel Seed", "Dried Galangal", "Cardamom", "Chili Spur Pepper", "Caraway"}, {"KaowTong","Parsley", "Vietnamese Coriander"}},
-        {"Laab Lor", {"Beef", "Buffalo", "Fried Garlic", "Blood", "Offal"}, {"Makwaen", "Coriander", "Nutmeg", "Star Anise", "Black Pepper", "Long Pepper", "Cinnamon", "Clove"}, {"Makwaen", "Fragrant", "Fennel Seed", "Dried Galangal", "Cardamom", "Chili Spur Pepper", "Caraway"}, {"Matoom","Phak Paem","Dried Fennel Seed" }},
-        {"Laab Mi", {"Fried Garlic", "Blood", "Offal"}, {"Makwaen", "Coriander", "Nutmeg", "Star Anise", "Black Pepper", "Long Pepper", "Cinnamon", "Clove"}, {"Makwaen", "Fragrant", "Fennel Seed", "Dried Galangal", "Cardamom", "Chili Spur Pepper", "Caraway"}, {"Deeplygung", "Makwen-infused Fish Sauce", "Para Cress", "Olive"}},
-        {"Laab Wua Niao", {"Beef", "Fried Garlic", "Blood", "Offal"}, {"Makwaen", "Coriander", "Nutmeg", "Star Anise", "Black Pepper", "Long Pepper", "Cinnamon", "Clove"}, {"Makwaen", "Fragrant", "Fennel Seed", "Dried Galangal", "Cardamom", "Chili Spur Pepper", "Caraway"}, {"Makwen-infused Fish Sauce", "Damocles Tree", "Para Cress"}},
-        {"Laab Khwai Khom", {"Buffalo", "Fried Garlic", "Bile", "Blood"}, {"Makwaen", "Coriander", "Nutmeg", "Star Anise", "Black Pepper", "Long Pepper", "Cinnamon", "Clove"}, {"Makwaen", "Fragrant", "Fennel Seed", "Dried Galangal", "Cardamom", "Chili Spur Pepper", "Caraway"}, {"Oreille", "Para Cress", "Olive"}},
-        {"Laab Khwai Niao", {"Buffalo", "Fried Garlic", "Blood", "Offal"}, {"Makwaen", "Coriander", "Nutmeg", "Star Anise", "Black Pepper", "Long Pepper", "Cinnamon", "Clove"}, {"Makwaen", "Fragrant", "Fennel Seed", "Dried Galangal", "Cardamom", "Chili Spur Pepper", "Caraway"}, {"KaowTong", "Vietnamese Coriander", "Parsley"}},
-        {"Laab Khwai Khua Nam", {"Buffalo", "Fried Garlic", "Beef Broth", "Blood"}, {"Makwaen", "Coriander", "Nutmeg", "Star Anise", "Black Pepper", "Long Pepper", "Cinnamon", "Clove"}, {"Makwaen", "Fragrant", "Fennel Seed", "Dried Galangal", "Cardamom", "Chili Spur Pepper", "Caraway"}, {"Matoom","Damocles Tree", "Parsley"}},
-        {"Laab Mu Khua Haeng", {"Beef", "Offal", "Fried Garlic"}, {"Makwaen", "Coriander", "Nutmeg", "Star Anise", "Black Pepper", "Long Pepper", "Cinnamon", "Clove"}, {"Makwaen", "Fragrant", "Fennel Seed", "Dried Galangal", "Cardamom", "Chili Spur Pepper", "Caraway"}, {"Oreille", "Deeplygung", "Dried Fennel Seed", "Damocles Tree", "Para Cress"}},
-        {"Laab Wua Khua Nam", {"Beef", "Fried Garlic", "Beef Broth", "Blood"}, {"Makwaen", "Coriander", "Nutmeg", "Star Anise", "Black Pepper", "Long Pepper", "Cinnamon", "Clove"}, {"Makwaen", "Fragrant", "Fennel Seed", "Dried Galangal", "Cardamom", "Chili Spur Pepper", "Caraway"}, {"Matoom", "Damocles Tree","Olive"}},
+        {"Laab Wua Khom", {"Beef", "Fried garlic", "Bile", "Blood"}, {"Dry Makwaen", "Coriander", "Nutmeg", "Star Anise", "Black Pepper", "Long Pepper", "Cinnamon", "Clove"}, {"Makwaen", "Fragrant", "Fennel Seed", "Dried Galangal", "Cardamom", "Chili Spur Pepper", "Caraway"}, {"KaowTong","Parsley", "Vietnamese Coriander"}},
+        {"Laab Lor", {"Beef", "Buffalo", "Fried Garlic", "Blood", "Offal"}, {"Dry Makwaen", "Coriander", "Nutmeg", "Star Anise", "Black Pepper", "Long Pepper", "Cinnamon", "Clove"}, {"Makwaen", "Fragrant", "Fennel Seed", "Dried Galangal", "Cardamom", "Chili Spur Pepper", "Caraway"}, {"Matoom","Phak Paem","Dried Fennel Seed" }},
+        {"Laab Mi", {"Fried Garlic", "Blood", "Offal"}, {"Dry Makwaen", "Coriander", "Nutmeg", "Star Anise", "Black Pepper", "Long Pepper", "Cinnamon", "Clove"}, {"Makwaen", "Fragrant", "Fennel Seed", "Dried Galangal", "Cardamom", "Chili Spur Pepper", "Caraway"}, {"Deeplygung", "Makwen-infused Fish Sauce", "Para Cress", "Olive"}},
+        {"Laab Wua Niao", {"Beef", "Fried Garlic", "Blood", "Offal"}, {"Dry Makwaen", "Coriander", "Nutmeg", "Star Anise", "Black Pepper", "Long Pepper", "Cinnamon", "Clove"}, {"Makwaen", "Fragrant", "Fennel Seed", "Dried Galangal", "Cardamom", "Chili Spur Pepper", "Caraway"}, {"Makwen-infused Fish Sauce", "Damocles Tree", "Para Cress"}},
+        {"Laab Khwai Khom", {"Buffalo", "Fried Garlic", "Bile", "Blood"}, {"Dry Makwaen", "Coriander", "Nutmeg", "Star Anise", "Black Pepper", "Long Pepper", "Cinnamon", "Clove"}, {"Makwaen", "Fragrant", "Fennel Seed", "Dried Galangal", "Cardamom", "Chili Spur Pepper", "Caraway"}, {"Oreille", "Para Cress", "Olive"}},
+        {"Laab Khwai Niao", {"Buffalo", "Fried Garlic", "Blood", "Offal"}, {"Dry Makwaen", "Coriander", "Nutmeg", "Star Anise", "Black Pepper", "Long Pepper", "Cinnamon", "Clove"}, {"Makwaen", "Fragrant", "Fennel Seed", "Dried Galangal", "Cardamom", "Chili Spur Pepper", "Caraway"}, {"KaowTong", "Vietnamese Coriander", "Parsley"}},
+        {"Laab Khwai Khua Nam", {"Buffalo", "Fried Garlic", "Beef Broth", "Blood"}, {"Dry Makwaen", "Coriander", "Nutmeg", "Star Anise", "Black Pepper", "Long Pepper", "Cinnamon", "Clove"}, {"Makwaen", "Fragrant", "Fennel Seed", "Dried Galangal", "Cardamom", "Chili Spur Pepper", "Caraway"}, {"Matoom","Damocles Tree", "Parsley"}},
+        {"Laab Mu Khua Haeng", {"Beef", "Offal", "Fried Garlic"}, {"Dry Makwaen", "Coriander", "Nutmeg", "Star Anise", "Black Pepper", "Long Pepper", "Cinnamon", "Clove"}, {"Makwaen", "Fragrant", "Fennel Seed", "Dried Galangal", "Cardamom", "Chili Spur Pepper", "Caraway"}, {"Oreille", "Deeplygung", "Dried Fennel Seed", "Damocles Tree", "Para Cress"}},
+        {"Laab Wua Khua Nam", {"Beef", "Fried Garlic", "Beef Broth", "Blood"}, {"Dry Makwaen", "Coriander", "Nutmeg", "Star Anise", "Black Pepper", "Long Pepper", "Cinnamon", "Clove"}, {"Makwaen", "Fragrant", "Fennel Seed", "Dried Galangal", "Cardamom", "Chili Spur Pepper", "Caraway"}, {"Matoom", "Damocles Tree","Olive"}},
 };
 
 // รายการส่วนผสมแบ่งตามประเภท
@@ -72,8 +80,8 @@ vector<Ingredient> vegetables = {
 };
 
 vector<Ingredient> spices = {
-    {"Makwaen", "spice"}, {"Fragrant", "spice"}, {"Fennel Seed", "spice"}, {"Dried Galangal", "spice"},
-    {"Cardamom", "spice"}, {"Chili Spur Pepper", "spice"}, {"Caraway", "spice"}
+    {"Dry Makwaen", "spices"}, {"Fragrant", "spices"}, {"Fennel Seed", "spices"}, {"Dried Galangal", "spices"},
+    {"Cardamom", "spices"}, {"Chili Spur Pepper", "spices"}, {"Caraway", "spices"}
 };
 
 // ฟังก์ชันสุ่มสูตรลาบ
@@ -81,14 +89,13 @@ LarbRecipe drawLarbRecipe() {
     return recipes[rand() % recipes.size()];
 }
 
-void printIngredient(vector<string> Ingredient){
-    for (int i = 0; i < Ingredient.size(); i++){
-        if (i != 0){
+void printIngredient(vector<string> Ingredient) {
+    for (int i = 0; i < Ingredient.size(); i++) {
+        if (i != 0) {
             cout << ", ";
         }
         cout << Ingredient[i];
     }
-
 }
 //แสดงสูตรลาบ และส่วนผสม
 void printRecipe(const LarbRecipe& recipe) {
@@ -98,13 +105,13 @@ void printRecipe(const LarbRecipe& recipe) {
     cout << setw(20) << "Meats: ";
     printIngredient(recipe.mainIngredients);
     cout << endl;
-    cout << setw(20) << "Spices: " ;
+    cout << setw(20) << "Spices: ";
     printIngredient(recipe.spices);
     cout << endl;
-    cout << setw(20) << "Herbs: " ;
+    cout << setw(20) << "Herbs: ";
     printIngredient(recipe.herbs);
     cout << endl;
-    cout << setw(20) << "Vegetables: " ;
+    cout << setw(20) << "Vegetables: ";
     printIngredient(recipe.specialIngredients);
     cout << "\n------------------------------------------------------------------------------------------------------\n" << "\n";
 }
@@ -120,75 +127,41 @@ vector<string> rollFourSideDice() {
     for (int i = 0; i < 5; ++i) {
         cout << ". ";
         cout.flush();
-        this_thread::sleep_for(chrono::milliseconds(300));
+        std::this_thread::sleep_for(chrono::milliseconds(300));
     }
     cout << "Done!" << endl;
-    this_thread::sleep_for(chrono::milliseconds(500));
+    std::this_thread::sleep_for(chrono::milliseconds(500));
 
     cout << "The results of the dice roll:  ";
     for (int i = 0; i < 4; i++) {
         int roll = (rand() % 4);
         cout << Colors[roll] << " ";
         resultsColour.push_back(Colors[roll]);
-        this_thread::sleep_for(chrono::milliseconds(250));
+        std::this_thread::sleep_for(chrono::milliseconds(250));
     }
     cout << endl;
 
     return resultsColour;
 }
 
-Player drawFortuneCard(Player player) {
-    vector<string> cards = {"Suan Krua", "Moitgure", "Regular Customer", "Moldy Cutting Board", "The Kitchen", "Rainy Season", "Falling Mortar", "Falling Tray"};
+Card drawFortuneCard() {
+    vector<Card> cards = {
+        {"Suan Krua", "Many of the spices in Chili Laap are found in Lanna gardens and today you have the opportunity to visit that garden and pick up the brown spices you want."},
+        {"Moitgure", "Good chili paste is dry. Moisture causes chili paste to clump and mold. Your spices have moisture that will ruin your chili paste. Pick up 1 brown spice and return it to the center pile."},
+        {"Regular Customer", "Being a regular at the butcher shop gives you the chance to choose quality meat before anyone else. Pick up one of the red tokens."},
+        {"Moldy Cutting Board", "The cutting board for making larb must be dry and clean. Failure to store the cutting board causes mold and damages the meat. Pick up 1 red poden. Return to the center pile."},
+        {"The Kitchen", "Many of the spices in chili paste are found in the kitchen garden. Just pick up one orange spice of your choice."},
+        {"Rainy Season", "The humid rainy season brings forth many kinds of vegetables that are perfect for eating with laab. Pick up any green token you want."},
+        {"Falling Mortar", "Mortar is a tool used to finely pound spices and turn them into chili paste. Your mortar spoiled the prepared spices. Pick up 1 orange spice and return it to the center pile."},
+        {"Falling Tray", "You prepared the vegetables and the laab well, but unfortunately you made 1 piece of green yin poden tray back to the center."}
+    };
 
-    int randomCards = rand() % cards.size(); // สุ่มดัชนีการ์ด
-    string selectedCard = cards[randomCards]; // เก็บการ์ดที่สุ่มได้
+    int randomCards = rand() % cards.size();
+    return cards[randomCards];
+}
 
-    // Determine the card text based on the selected card
-    string cardText;
-    if (selectedCard == "Suan Krua") {
-        cardText = "Many of the spices in Chili Laap are found in Lanna gardens and today you have the opportunity to visit that garden and pick up the brown spices you want.";
-    } else if (selectedCard == "Moitgure") {
-        cardText = "Good chili paste is dry. Moisture causes chili paste to clump and mold. Your spices have moisture that will ruin your chili paste. Pick up 1 brown spice and return it to the center pile.";
-    } else if (selectedCard == "Regular Customer") {
-        cardText = "Being a regular at the butcher shop gives you the chance to choose quality meat before anyone else. Pick up one of the red tokens.";
-    } else if (selectedCard == "Moldy Cutting Board") {
-        cardText = "The cutting board for making larb must be dry and clean. Failure to store the cutting board causes mold and damages the meat. Pick up 1 red poden. Return to the center pile.";
-    } else if (selectedCard == "The Kitchen") {
-        cardText = "Many of the spices in chili paste are found in the kitchen garden. Just pick up one orange spice of your choice.";
-    } else if (selectedCard == "Rainy Season") {
-        cardText = "The humid rainy season brings forth many kinds of vegetables that are perfect for eating with laab. Pick up any green token you want.";
-    } else if (selectedCard == "Falling Mortar") {
-        cardText = "Mortar is a tool used to finely pound spices and turn them into chili paste. Your mortar spoiled the prepared spices. Pick up 1 orange spice and return it to the center pile.";
-    } else if (selectedCard == "Falling Tray") {
-        cardText = "You prepared the vegetables and the laab well, but unfortunately you made 1 piece of green yin poden tray back to the center.";
-    }
-
-    // Calculate frame dimensions
-    int cardWidth = 70; // Adjust as needed
-    int textPadding = 5; // Adjust as needed
-    int namePadding = (cardWidth - selectedCard.length()) / 2;
-    
-    // Draw the top border
-    cout << "+" << string(cardWidth - 2, '-') << " +" << endl;
-    
-    //print card name
-    cout << "| " << setw(namePadding) << "" << selectedCard << setw(namePadding) << "" << "|" << endl;
-    
-    // Draw the card text within the frame
-    int currentLineStart = 0;
-    while (currentLineStart < cardText.length()) {
-        int currentLineLength = cardWidth - (2 + 2 * textPadding); // Minus 2 for the '|' on each side, minus padding
-        string currentLine = cardText.substr(currentLineStart, currentLineLength);
-         int Padding = (cardWidth - 2 - currentLine.length())/2;
-        cout << "| " << setw(textPadding) << "" <<  left << setw(currentLineLength) << currentLine << setw(textPadding) << "" << " |" << endl;
-        currentLineStart += currentLineLength;
-    }
-
-    // Draw the bottom border
-    cout << "+" << string(cardWidth - 2, '-') << " +" << endl;
-    cout << endl;
-    
-    if (selectedCard == "Suan Krua") {
+Player handleCardEffect(Player player, const Card& card) {
+    if (card.name == "Suan Krua") {
         player.herbs++;
         if (player.herbs > player.recipe.herbs.size()) {
             player.herbs--; // Remove the extra one
@@ -205,16 +178,16 @@ Player drawFortuneCard(Player player) {
             }
         }
     }
-    else if (selectedCard == "Moitgure") {
+    else if (card.name == "Moitgure") {
         player.herbs--;
         if (player.herbs < 0) {
             player.herbs = 0;
         }
     }
-    else if (selectedCard == "Regular Customer") {
+    else if (card.name == "Regular Customer") {
         player.mainIngredients++;
         if (player.mainIngredients > player.recipe.mainIngredients.size()) {
-             player.mainIngredients--;
+            player.mainIngredients--;
             if (player.spices < player.recipe.spices.size()) {
                 player.spices++;
             }
@@ -226,13 +199,13 @@ Player drawFortuneCard(Player player) {
             }
         }
     }
-    else if (selectedCard == "Moldy Cutting Board") {
+    else if (card.name == "Moldy Cutting Board") {
         player.mainIngredients--;
         if (player.mainIngredients < 0) {
             player.mainIngredients = 0;
         }
     }
-    else if (selectedCard == "The Kitchen") {
+    else if (card.name == "The Kitchen") {
         player.spices++;
         if (player.spices > player.recipe.spices.size()) {
             player.spices--;
@@ -247,11 +220,11 @@ Player drawFortuneCard(Player player) {
             }
         }
     }
-    else if (selectedCard == "Rainy Season") {
+    else if (card.name == "Rainy Season") {
         player.specialIngredients++;
         if (player.specialIngredients > player.recipe.specialIngredients.size()) {
             player.specialIngredients--;
-             if (player.mainIngredients < player.recipe.mainIngredients.size()) {
+            if (player.mainIngredients < player.recipe.mainIngredients.size()) {
                 player.mainIngredients++;
             }
             else if (player.spices < player.recipe.spices.size()) {
@@ -262,13 +235,13 @@ Player drawFortuneCard(Player player) {
             }
         }
     }
-    else if (selectedCard == "Falling Mortar") {
+    else if (card.name == "Falling Mortar") {
         player.spices--;
         if (player.spices < 0) {
             player.spices = 0;
         }
     }
-    else if (selectedCard == "Falling Tray") {
+    else if (card.name == "Falling Tray") {
         player.specialIngredients--;
         if (player.specialIngredients < 0) {
             player.specialIngredients = 0;
@@ -277,30 +250,31 @@ Player drawFortuneCard(Player player) {
     return player;
 }
 
+void displayCard(const Card& card) {
+    // Calculate frame dimensions
+    int cardWidth = 70; // Adjust as needed
+    int textPadding = 5; // Adjust as needed
+    int namePadding = (cardWidth - card.name.length()) / 2;
 
-bool Winner(Player player){
-    if(player.mainIngredients < player.recipe.mainIngredients.size()){
-        return false;
-    }
-    if(player.spices < player.recipe.spices.size()){
-        return false;
-    }
-    if(player.herbs < player.recipe.herbs.size()){
-        return false;
-    }
-    if(player.specialIngredients < player.recipe.specialIngredients.size()){
-        return false;
-    }
-    return true;
-}
+    // Draw the top border
+    cout << "+" << string(cardWidth - 2, '-') << " +" << endl;
 
-bool isNameUnique(const vector<Player>& players, const string& name) {
-    for (const auto& player : players) {
-        if (player.name == name) {
-            return false; // ถ้าชื่อซ้ำจะส่งค่าผลลัพธ์เป็น false
-        }
+    // Print card name
+    cout << "| " << setw(namePadding) << "" << card.name << setw(namePadding) << "" << "|" << endl;
+
+    // Draw the card text within the frame
+    int currentLineStart = 0;
+    while (currentLineStart < card.description.length()) {
+        int currentLineLength = cardWidth - (2 + 2 * textPadding); // Minus 2 for the '|' on each side, minus padding
+        string currentLine = card.description.substr(currentLineStart, currentLineLength);
+        int Padding = (cardWidth - 2 - currentLine.length()) / 2;
+        cout << "| " << setw(textPadding) << "" << left << setw(currentLineLength) << currentLine << setw(textPadding) << "" << " |" << endl;
+        currentLineStart += currentLineLength;
     }
-    return true; // ถ้าชื่อไม่ซ้ำ
+
+    // Draw the bottom border
+    cout << "+" << string(cardWidth - 2, '-') << " +" << endl;
+    cout << endl;
 }
 
 void shownPlayerItem(Player player) {
@@ -319,8 +293,8 @@ void shownPlayerItem(Player player) {
 
 // ฟังก์ชันคืนค่ารายการสีที่ออกเพียงครั้งเดียว
 vector<string> getUniqueColors(const vector<string>& resultsColour) {
-    map<string, int> colorFrequency;
-    map<string, int> colorCount;
+    unordered_map<string, int> colorFrequency;
+    unordered_map<string, int> colorCount;
 
     // นับจำนวนครั้งที่สีแต่ละสีปรากฏขึ้น
     for (const string& color : resultsColour) {
@@ -347,59 +321,70 @@ vector<string> getUniqueColors(const vector<string>& resultsColour) {
     return uniqueColors;
 }
 
+
 void inputIngredientsByColor(Player& player, const vector<string>& colors) {
     // หาสีที่ออกมาแค่ครั้งเดียว
     vector<string> uniqueColors = getUniqueColors(colors);
 
     // แสดงสีที่มีให้เลือก
-    cout << "DEBUG: สีที่ไม่ซ้ำกัน:\n";
+    cout << "DEBUG: Scan color:\n";
     for (const string& color : uniqueColors) {
         cout << color << endl;
     }
 
     // เลือกส่วนผสมตามสีที่ไม่ซ้ำ
     for (const string& color : uniqueColors) {
-        cout << "กรุณาใส่ส่วนผสมสำหรับสี " << color << ":" << endl;
+        cout << "Please add the ingredients for the color. " << color << ":" << endl;
         string ingredient;
         bool valid = false;
 
         while (!valid) {
-            cout << "เลือกหมายเลขส่วนผสม: ";
+            cout << "Select ingredient number: ";
             int index;
             cin >> index;
 
             if (cin.fail()) {
                 cin.clear();
                 cin.ignore(numeric_limits<streamsize>::max(), '\n');
-                cout << "กรุณาใส่หมายเลขที่ถูกต้อง\n";
+                cout << "Please enter a valid number.\n";
                 continue;
             }
 
             // ตรวจสอบและเลือกส่วนผสมตามประเภทสี
-            if (color == "Red" && index > 0 && index <= player.recipe.mainIngredients.size()) {
-                ingredient = player.recipe.mainIngredients[index - 1];
-                player.mainIngredients++;
-                valid = true;
-            } else if (color == "Brown" && index > 0 && index <= player.recipe.herbs.size()) {
-                ingredient = player.recipe.herbs[index - 1];
-                valid = true;
-            } else if (color == "Orange" && index > 0 && index <= player.recipe.spices.size()) {
-                ingredient = player.recipe.spices[index - 1];
-                valid = true;
-            } else if (color == "Green" && index > 0 && index <= player.recipe.specialIngredients.size()) {
-                ingredient = player.recipe.specialIngredients[index - 1];
-                valid = true;
-            } else {
-                cout << "หมายเลขส่วนผสมไม่ถูกต้อง กรุณาลองใหม่\n";
+            if (color == "Red") {
+                if(player.mainIngredients >= player.recipe.mainIngredients.size()){
+                    cout << "You have already reached the maximum main ingredients" << endl;
+                    continue;
+                }
+        
+            } else if (color == "Brown"){
+                if(player.herbs >= player.recipe.herbs.size()){
+                    cout << "You have already reached the maximum herbs" << endl;
+                    continue;
+                }
+        
+            } else if (color == "Orange") {
+                 if(player.spices >= player.recipe.spices.size()){
+                    cout << "You have already reached the maximum spices" << endl;
+                    continue;
+                }
+            } else if (color == "Green") {
+                 if(player.specialIngredients >= player.recipe.specialIngredients.size()){
+                    cout << "You have already reached the maximum specialIngredients" << endl;
+                    continue;
+                }
+            }else{
+                cout << "Color invalid." << endl;
+                continue;
             }
-        }
 
         // บันทึกส่วนผสมที่เลือกลง Player
         player.ingredients.push_back(ingredient);
     }
 }
+}
 
-bool checkIngredients(const Player& player) {
+bool checkIngredients(const Player& player){
     set<string> requiredIngredients(player.recipe.mainIngredients.begin(), player.recipe.mainIngredients.end());
     requiredIngredients.insert(player.recipe.spices.begin(), player.recipe.spices.end());
     requiredIngredients.insert(player.recipe.herbs.begin(), player.recipe.herbs.end());
@@ -412,7 +397,7 @@ bool checkIngredients(const Player& player) {
     return requiredIngredients.empty();
 }
 
-int main() {
+int main(){
     srand(time(0));
     int numPlayers;
     
@@ -449,30 +434,14 @@ int main() {
     cout << "\n------------------------------------------" << endl;
     cout << endl << "      [Member Player in this round] " << endl;
     
-    cin.ignore(); // กำจัดบรรทัดที่ค้างจากการรับค่า numPlayers
     for (int i = 0; i < numPlayers; i++) {
         cout << endl;
-        string playerName;
-        bool uniqueName = false;
-        
-        // ตรวจสอบชื่อผู้เล่น
-        while (!uniqueName) {
-            cout << "Enter player " << i + 1 << " name: ";
-            getline(cin, playerName); // ใช้ getline เพื่อรับชื่อที่มีช่องว่าง
-            
-            if (isNameUnique(players, playerName)) {
-                players[i].name = playerName; // ถ้าชื่อไม่ซ้ำก็เก็บ
-                uniqueName = true;
-            } else {
-                cout << endl;
-                cout << "Name already taken. Please choose a different name.\n";
-                cout << endl;
-            }
-        }
+        cout << " Enter player " << i + 1 << " name: ";
+        cin >> players[i].name;
+     
     }
     cout << "\n------------------------------------------\n\n" << endl;
     cout << endl;
-    cout << "Press [Enter] to draw a recipe for each player.";
     cin.get();
     // สุ่มสูตรลาบ
     for (int i = 0; i < numPlayers; i++) {
@@ -504,7 +473,9 @@ int main() {
             cout << "You must randomly draw a fortune card.!!!" << endl;
             cout << "Press [Enter] for to randomly select a card.\n";
             cin.get();
-            players[i] = drawFortuneCard(players[i]);
+            Card card = drawFortuneCard(); // Draw a card
+            displayCard(card); // Display the card
+            players[i] = handleCardEffect(players[i],card);
             cout << endl;
             printRecipe(players[i].recipe);
             inputIngredientsByColor(players[i], resultsColour); // ให้ผู้เล่นพิมพ์ส่วนผสมเองตามสีที่ได้
