@@ -56,7 +56,7 @@ vector<Ingredient> meats = {
 
 vector<Ingredient> herbs = {
     {"Makwaen", "herb"}, {"Coriander", "herb"}, {"Nutmeg", "herb"}, {"Star Anise", "herb"},
-    {"Black pepper", "herb"}, {"Long pepper", "herb"}, {"Cinnamon", "herb"}, {"Clove", "herb"}
+    {"Black Pepper", "herb"}, {"Long Pepper", "herb"}, {"Cinnamon", "herb"}, {"Clove", "herb"}
 };
 
 vector<Ingredient> vegetables = {
@@ -89,7 +89,7 @@ void printIngredient(vector<string> Ingredient){
 string getColorForIngredientType(const string& ingredientType) {
     if (ingredientType == "meat") return "\033[31m";  // Red for meat
     if (ingredientType == "herb") return "\033[38;5;94m";  // Brown for herb
-    if (ingredientType == "spice") return "\033[38;5;214m";  // Blue for spices
+    if (ingredientType == "spice") return "\033[38;5;214m";  // orange for spices
     if (ingredientType == "vegetable") return "\033[32m";  // Green for vegetables
     return "\033[0m";  // Reset for default
 }
