@@ -294,6 +294,15 @@ bool Winner(Player player){
     return true;
 }
 
+bool isNameUnique(const vector<Player>& players, const string& name) {
+    for (const auto& player : players) {
+        if (player.name == name) {
+            return false; // ถ้าชื่อซ้ำจะส่งค่าผลลัพธ์เป็น false
+        }
+    }
+    return true; // ถ้าชื่อไม่ซ้ำ
+}
+
 void shownPlayerItem(Player player) {
     cout << setw(50) << setfill('-') << "-" << endl;
     cout << setfill(' ');
@@ -310,8 +319,8 @@ void shownPlayerItem(Player player) {
 
 // ฟังก์ชันคืนค่ารายการสีที่ออกเพียงครั้งเดียว
 vector<string> getUniqueColors(const vector<string>& resultsColour) {
-    unordered_map<string, int> colorFrequency;
-    unordered_map<string, int> colorCount;
+    map<string, int> colorFrequency;
+    map<string, int> colorCount;
 
     // นับจำนวนครั้งที่สีแต่ละสีปรากฏขึ้น
     for (const string& color : resultsColour) {
@@ -440,14 +449,30 @@ int main() {
     cout << "\n------------------------------------------" << endl;
     cout << endl << "      [Member Player in this round] " << endl;
     
+    cin.ignore(); // กำจัดบรรทัดที่ค้างจากการรับค่า numPlayers
     for (int i = 0; i < numPlayers; i++) {
         cout << endl;
-        cout << " Enter player " << i + 1 << " name: ";
-        cin >> players[i].name;
-     
+        string playerName;
+        bool uniqueName = false;
+        
+        // ตรวจสอบชื่อผู้เล่น
+        while (!uniqueName) {
+            cout << "Enter player " << i + 1 << " name: ";
+            getline(cin, playerName); // ใช้ getline เพื่อรับชื่อที่มีช่องว่าง
+            
+            if (isNameUnique(players, playerName)) {
+                players[i].name = playerName; // ถ้าชื่อไม่ซ้ำก็เก็บ
+                uniqueName = true;
+            } else {
+                cout << endl;
+                cout << "Name already taken. Please choose a different name.\n";
+                cout << endl;
+            }
+        }
     }
     cout << "\n------------------------------------------\n\n" << endl;
     cout << endl;
+    cout << "Press [Enter] to draw a recipe for each player.";
     cin.get();
     // สุ่มสูตรลาบ
     for (int i = 0; i < numPlayers; i++) {
