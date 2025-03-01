@@ -102,24 +102,24 @@ void printIngredient(const vector<string>& ingredients) {
 void printRecipe(const LarbRecipe& recipe) {
     cout << endl;
     cout << left << setw(20) << "Category" << setw(60) << "Ingredients" << endl;
-    cout << "------------------------------------------------------------------------------------------------------" << endl;
-    cout << setw(20) << "\033[31mMeats: \033[0m";
+    cout << "---------------------------------------------------------------------------------------------------------" << endl;
+    cout << setw(20) << "\033[31mMeats:              \033[0m";
     printIngredient(recipe.mainIngredients);
     cout << endl;
-    cout << setw(20) << "\033[38;5;214mSpices: \033[0m";
+    cout << setw(20) << "\033[38;5;214mSpices:             \033[0m";
     printIngredient(recipe.spices);
     cout << endl;
-    cout << setw(20) << "\033[38;5;94mHerbs: \033[0m";
+    cout << setw(20) << "\033[38;5;94mHerbs:              \033[0m";
     printIngredient(recipe.herbs);
     cout << endl;
-    cout << setw(20) << "\033[32mVegetables: \033[0m";
+    cout << setw(20) << "\033[32mVegetables:         \033[0m";
     printIngredient(recipe.specialIngredients);
-    cout << "\n------------------------------------------------------------------------------------------------------\n" << "\n";
+    cout << "\n---------------------------------------------------------------------------------------------------------\n" << "\n";
 }
 //ฟังก์ชันทอยลูกเต๋า
 vector<string> rollFourSideDice() {
     vector<string> resultsColour;
-    string Colors[] = {"Red", "Brown", "Orange", "Green"};
+    string Colors[] = {"\033[31mRed\033[0m", "\033[38;5;94mBrown\033[0m", "\033[38;5;214mOrange\033[0m", "\033[32mGreen\033[0m"};
 
     cout << "The dice are rolling... ";
     cout.flush();
@@ -327,17 +327,17 @@ void inputIngredientsByColor(Player& player, const vector<string>& colors) {
     vector<string> uniqueColors = getUniqueColors(colors);
     unordered_map<string, unordered_set<int>> selectedIndicesPerColor; // เก็บหมายเลขที่เลือกแยกตามสี
     unordered_map<string, vector<string>> ingredientMap = {
-        {"Red", player.recipe.mainIngredients},
-        {"Brown", player.recipe.herbs},
-        {"Orange", player.recipe.spices},
-        {"Green", player.recipe.specialIngredients}
+        {"\033[31mRed\033[0m", player.recipe.mainIngredients},
+        {"\033[38;5;94mBrown\033[0m", player.recipe.herbs},
+        {"\033[38;5;214mOrange\033[0m", player.recipe.spices},
+        {"\033[32mGreen\033[0m", player.recipe.specialIngredients}
     };
 
     unordered_map<string, int*> ingredientCountMap = {
-        {"Red", &player.mainIngredients},
-        {"Brown", &player.herbs},
-        {"Orange", &player.spices},
-        {"Green", &player.specialIngredients}
+        {"\033[31mRed\033[0m", &player.mainIngredients},
+        {"\033[38;5;94mBrown\033[0m", &player.herbs},
+        {"\033[38;5;214mOrange\033[0m", &player.spices},
+        {"\033[32mGreen\033[0m", &player.specialIngredients}
     };
 
     for (const string& color : uniqueColors) {
@@ -398,9 +398,6 @@ void inputIngredientsByColor(Player& player, const vector<string>& colors) {
     }
 }
 
-
-
-
 bool checkIngredients(const Player& player){
     set<string> requiredIngredients(player.recipe.mainIngredients.begin(), player.recipe.mainIngredients.end());
     requiredIngredients.insert(player.recipe.spices.begin(), player.recipe.spices.end());
@@ -417,11 +414,39 @@ bool checkIngredients(const Player& player){
 bool isNameUnique(const vector<Player>& players, const string& name) {
     for (const auto& player : players) {
         if (player.name == name) {
-            return false; // ถ้าชื่อซ้ำจะส่งค่าผลลัพธ์เป็น false
+            return false;
         }
     }
-    return true; // ถ้าชื่อไม่ซ้ำ
+    return true;
 }
+
+// Function to get a valid player name
+string validateName(const vector<Player>& players, int playerNumber) {
+    string playerName;
+    bool uniqueName = false;
+
+    while (!uniqueName) {
+        cout << "Enter player " << playerNumber << " name: ";
+        getline(cin, playerName); // Use getline to handle spaces in names
+
+        if (playerName.empty()) {
+            cout << endl;
+            cout << "Name cannot be empty. Please enter a valid name.\n";
+            cout << endl;
+            continue;
+        }
+
+        if (isNameUnique(players, playerName)) {
+            uniqueName = true;
+        } else {
+            cout << endl;
+            cout << "Name already taken. Please choose a different name.\n";
+            cout << endl;
+        }
+    }
+    return playerName;
+}
+
 
 int main(){
     srand(time(0));
@@ -459,28 +484,15 @@ int main(){
      // ตั้งค่าผู้เล่น
      cout << "\n------------------------------------------" << endl;
      cout << endl << "      [Member Player in this round] " << endl;
-     
-     cin.ignore(); // กำจัดบรรทัดที่ค้างจากการรับค่า numPlayers
-     for (int i = 0; i < numPlayers; i++) {
-         cout << endl;
-         string playerName;
-         bool uniqueName = false;
-         
-         // ตรวจสอบชื่อผู้เล่น
-         while (!uniqueName) {
-             cout << "Enter player " << i + 1 << " name: ";
-             getline(cin, playerName); // ใช้ getline เพื่อรับชื่อที่มีช่องว่าง
-             
-             if (isNameUnique(players, playerName)) {
-                 players[i].name = playerName; // ถ้าชื่อไม่ซ้ำก็เก็บ
-                 uniqueName = true;
-             } else {
-                 cout << endl;
-                 cout << "Name already taken. Please choose a different name.\n";
-                 cout << endl;
-             }
-         }
-     }
+    
+    cin.ignore(); // Clear newline from previous input
+
+    for (int i = 0; i < numPlayers; i++) {
+        cout << endl;
+        players[i].name = validateName(players, i + 1);
+    }
+    cout << "\n------------------------------------------\n\n" << endl;
+    cout << endl;
     // สุ่มสูตรลาบ
     for (int i = 0; i < numPlayers; i++) {
     LarbRecipe recipe = drawLarbRecipe();
