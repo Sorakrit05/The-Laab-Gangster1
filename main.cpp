@@ -447,6 +447,16 @@ string validateName(const vector<Player>& players, int playerNumber) {
     return playerName;
 }
 
+void displayWinner(const string& winnerName) {
+    cout << "\n******************************************\n";
+    cout << "*                                        *\n";
+    cout << "*           CONGRATULATIONS!             *\n";
+    cout << "*  🔥  You are the Real gangster laab 🔥   *\n";
+    cout << "*       "<< winnerName << " is the winner!          *\n";
+    cout << "*                                        *\n";
+    cout << "******************************************\n";
+}
+
 
 int main(){
     srand(time(0));
@@ -535,7 +545,8 @@ int main(){
         cout << endl;
 
         if(checkIngredients(players[i])){
-            cout << "The winner is " << players[i].name << endl;
+            cout << endl;
+            displayWinner(players[i].name); 
             winnerFound = true;
         } else {
             cout << endl;
