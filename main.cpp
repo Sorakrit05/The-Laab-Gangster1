@@ -403,17 +403,20 @@ void inputIngredientsByColor(Player& player, const vector<string>& colors) {
     }
 }
 
-bool checkIngredients(const Player& player){
-    set<string> requiredIngredients(player.recipe.mainIngredients.begin(), player.recipe.mainIngredients.end());
-    requiredIngredients.insert(player.recipe.spices.begin(), player.recipe.spices.end());
-    requiredIngredients.insert(player.recipe.herbs.begin(), player.recipe.herbs.end());
-    requiredIngredients.insert(player.recipe.specialIngredients.begin(), player.recipe.specialIngredients.end());
-
-    for (const string& ingredient : player.ingredients) {
-        requiredIngredients.erase(ingredient);
+bool Winner(Player player){
+    if(player.mainIngredients < player.recipe.mainIngredients.size()){
+        return false;
     }
-
-    return requiredIngredients.empty();
+    if(player.spices < player.recipe.spices.size()){
+        return false;
+    }
+    if(player.herbs < player.recipe.herbs.size()){
+        return false;
+    }
+    if(player.specialIngredients < player.recipe.specialIngredients.size()){
+        return false;
+    }
+    return true;
 }
 
 bool isNameUnique(const vector<Player>& players, const string& name) {
@@ -498,7 +501,7 @@ int main(){
     
      // ตั้งค่าผู้เล่น
      cout << "\n------------------------------------------" << endl;
-     cout << endl << "\033[33m      [Member Player in this round] \033[0m" << endl;
+     cout << endl << "\033[m      [Member Player in this round] \033[0m" << endl;
     
     cin.ignore(); // Clear newline from previous input
 
@@ -521,8 +524,7 @@ int main(){
         cout << "\n=============================================================================================================\n\n\n" << endl;
     }
     int i = 0;
-    bool winnerFound = false;
-    while(!winnerFound){
+    while(true){
         cout << "\n\n\n";
         cin.get(); 
         cout << "\033[32m#############################################################################################################\033[0m" << "\n" << endl;
@@ -552,10 +554,12 @@ int main(){
         
         cout << endl;
 
-        if(checkIngredients(players[i])){
+        if(Winner(players[i])){
             cout << endl;
             displayWinner(players[i].name); 
-            winnerFound = true;
+            break;
+
+            
         } else {
             cout << endl;
             shownPlayerItem(players[i]);
@@ -563,8 +567,9 @@ int main(){
             if(i >= numPlayers){
                 i = 0;
             }
+            cout << "\n\033[32m#############################################################################################################\033[0m\n" << endl;
         }
-        cout << "\n\033[32m#############################################################################################################\033[0m\n" << endl;
+       
     }
     return 0;
 }
