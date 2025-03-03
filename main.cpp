@@ -102,7 +102,7 @@ void printIngredient(const vector<string>& ingredients) {
 void printRecipe(const LarbRecipe& recipe) {
     cout << endl;
     cout << left << setw(20) << "Category" << setw(60) << "Ingredients" << endl;
-    cout << "---------------------------------------------------------------------------------------------------------" << endl;
+    cout << "-------------------------------------------------------------------------------------------------------------" << endl;
     cout << setw(20) << "\033[31mMeats:              \033[0m";
     printIngredient(recipe.mainIngredients);
     cout << endl;
@@ -114,7 +114,7 @@ void printRecipe(const LarbRecipe& recipe) {
     cout << endl;
     cout << setw(20) << "\033[32mVegetables:         \033[0m";
     printIngredient(recipe.specialIngredients);
-    cout << "\n---------------------------------------------------------------------------------------------------------\n" << "\n";
+    cout << "\n-------------------------------------------------------------------------------------------------------------\n" << "\n";
 }
 //ฟังก์ชันทอยลูกเต๋า
 vector<string> rollFourSideDice() {
@@ -285,10 +285,10 @@ void shownPlayerItem(const Player& player) {
     int needHerbs = max(0, (int)player.recipe.herbs.size() - player.herbs);
     int needVegetables = max(0, (int)player.recipe.specialIngredients.size() - player.specialIngredients);
 
-    cout << "\n+-------------------------------------------+\n";
-    cout << "|            \033[1mYour Ingredients\033[0m             |\n";
-    cout << "+-------------------------------------------+\n";
-    cout << "| Category      | Amount  | Need More       |\n";
+    cout << "\n+------------------------------------------+\n";
+    cout << "|            \033[1mYour Ingredients\033[0m              |\n";
+    cout << "+------------------------------------------+\n";
+    cout << "| Category     | Amount  | Need More       |\n";
     cout << "+--------------+---------+-----------------+\n";
     cout << "| \033[31mMeats       \033[0m | " << setw(7) << player.mainIngredients << " | " << setw(15) << needMeat << " |\n";
     cout << "| \033[38;5;214mSpices      \033[0m | " << setw(7) << player.spices << " | " << setw(15) << needSpices << " |\n";
@@ -498,7 +498,7 @@ int main(){
     
      // ตั้งค่าผู้เล่น
      cout << "\n------------------------------------------" << endl;
-     cout << endl << "      [Member Player in this round] " << endl;
+     cout << endl << "\033[33m      [Member Player in this round] \033[0m" << endl;
     
     cin.ignore(); // Clear newline from previous input
 
@@ -511,20 +511,23 @@ int main(){
     // สุ่มสูตรลาบ
     for (int i = 0; i < numPlayers; i++) {
     LarbRecipe recipe = drawLarbRecipe();
-        cout << "=======================================================================================================\n" << endl;
+        cout << "=============================================================================================================\n" << endl;
         cout << players[i].name << "!!  Get your recipe [Enter]";
         cin.get();
         players[i].recipe = recipe;
         cout << "received recipe: " << players[i].recipe.name << "\n";
         printRecipe(recipe);
         shownPlayerItem(players[i]);
-        cout << "\n=======================================================================================================\n\n" << endl;
+        cout << "\n=============================================================================================================\n\n\n" << endl;
     }
     int i = 0;
     bool winnerFound = false;
     while(!winnerFound){
+        cout << "\n\n\n";
+        cin.get(); 
+        cout << "\033[32m#############################################################################################################\033[0m" << "\n" << endl;
         cout << "This is your turn: " <<  players[i].name << endl;
-        cout << "Press [Enter] for roll dice";
+        cout << "\nPress [Enter] for roll dice";
         cin.get();
         vector<string> resultsColour = rollFourSideDice();
         vector<string> uniqueColors = getUniqueColors(resultsColour);
@@ -561,6 +564,7 @@ int main(){
                 i = 0;
             }
         }
+        cout << "\n\033[32m#############################################################################################################\033[0m\n" << endl;
     }
     return 0;
 }
