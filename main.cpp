@@ -160,6 +160,7 @@ Card drawFortuneCard() {
     int randomCards = rand() % cards.size();
     return cards[randomCards];
 }
+
 void inputRedIngredients(Player& player) {
     unordered_set<string> selectedIngredients; // เก็บวัตถุดิบที่เลือกไปแล้ว
 
@@ -348,18 +349,21 @@ void removeIngredient(Player& player, const string& colorCategory) {
         return;
     }
 
-    // ค้นหาวัตถุดิบที่ผู้เล่นมีอยู่
-    vector<string> ownedIngredients;
+    // ค้นหาวัตถุดิบที่ผู้เล่นมีอยู่ (ไม่ซ้ำกัน)
+    unordered_set<string> ownedIngredientsSet; // ใช้ set เพื่อป้องกันวัตถุดิบซ้ำ
     for (const string& ingredient : player.ingredients) {
         if (find(ingredientList->begin(), ingredientList->end(), ingredient) != ingredientList->end()) {
-            ownedIngredients.push_back(ingredient);
+            ownedIngredientsSet.insert(ingredient);
         }
     }
 
-    if (ownedIngredients.empty()) {
+    if (ownedIngredientsSet.empty()) {
         cout << "You have no " << colorCategory << " ingredients to remove.\n";
         return;
     }
+
+    // แปลง set เป็น vector เพื่อแสดงรายการ
+    vector<string> ownedIngredients(ownedIngredientsSet.begin(), ownedIngredientsSet.end());
 
     // แสดงรายการที่สามารถลบได้
     cout << "\nAvailable " << colorCategory << " ingredients to remove:\n";
@@ -391,7 +395,6 @@ void removeIngredient(Player& player, const string& colorCategory) {
         break;
     }
 }
-
 
 
 Player handleCardEffect(Player player, const Card& card) {
@@ -587,11 +590,18 @@ void inputIngredientsByColor(Player& player, const vector<string>& colors) {
         cout << "\nPlease add the ingredients for the color " << color << ":\n";
         vector<string>& availableIngredients = ingredientMap[color];
 
+        // ตรวจสอบว่าวัตถุดิบทั้งหมดในหมวดหมู่นี้ถูกเลือกไปแล้วหรือไม่
+        if (selectedIndicesPerColor[color].size() == availableIngredients.size()) {
+            cout << endl;
+            cout << "You have already selected all ingredients for " << color << ".\n";
+            continue;
+        }
+
         // แสดงวัตถุดิบพร้อมสถานะ
         cout << "Available ingredients for " << color << ":\n";
         for (size_t i = 0; i < availableIngredients.size(); ++i) {
             if (selectedIndicesPerColor[color].find(i + 1) != selectedIndicesPerColor[color].end()) {
-                cout << i + 1 << ". " << availableIngredients[i] << " (\033[33mYou already slected\033[0m)\n"; // แสดงสถานะ "หยิบไปแล้ว"
+                cout << i + 1 << ". " << availableIngredients[i] << " \033[34m(You already have)\033[0m\n"; // แสดงสถานะ "หยิบไปแล้ว"
             } else {
                 cout << i + 1 << ". " << availableIngredients[i] << "\n"; // แสดงวัตถุดิบที่ยังไม่ถูกเลือก
             }
@@ -628,7 +638,7 @@ void inputIngredientsByColor(Player& player, const vector<string>& colors) {
         }
 
         player.ingredients.push_back(ingredient);
-        cout << "DEBUG: Selected " << ingredient << " for color " << color << ".\n";
+        cout << "Added: " << ingredient << " to your ingredients.\n";
     }
 }
 
