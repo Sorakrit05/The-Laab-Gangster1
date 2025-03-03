@@ -120,7 +120,8 @@ void printRecipe(const LarbRecipe& recipe) {
     printIngredient(recipe.specialIngredients);
     cout << "\n-------------------------------------------------------------------------------------------------------------\n" << "\n";
 }
-//ฟังก์ชันทอยลูกเต๋า
+
+// ฟังก์ชันทอยลูกเต๋า
 vector<string> rollFourSideDice() {
     vector<string> resultsColour;
     string Colors[] = {"\033[31mRed\033[0m", "\033[38;5;94mBrown\033[0m", "\033[38;5;214mOrange\033[0m", "\033[32mGreen\033[0m"};
@@ -128,7 +129,6 @@ vector<string> rollFourSideDice() {
     cout << "The dice are rolling... ";
     cout.flush();
 
-    // Simulate dice rolling animation
     for (int i = 0; i < 5; ++i) {
         cout << ". ";
         cout.flush();
@@ -138,15 +138,31 @@ vector<string> rollFourSideDice() {
     std::this_thread::sleep_for(chrono::milliseconds(500));
 
     cout << "The results of the dice roll:  ";
+    unordered_map<string, int> colorCounts;
+    vector<string> rolledColors;
+    
     for (int i = 0; i < 4; i++) {
         int roll = (rand() % 4);
-        cout << Colors[roll] << " ";
-        resultsColour.push_back(Colors[roll]);
-        std::this_thread::sleep_for(chrono::milliseconds(250));
+        string color = Colors[roll];
+        colorCounts[color]++;
+        rolledColors.push_back(color);
+    }
+
+    // แสดงผลลัพธ์ของลูกเต๋า
+    for (const auto& color : rolledColors) {
+        cout << color << " ";
     }
     cout << endl;
 
-    return resultsColour;
+    // ตรวจสอบสีซ้ำและลบออกจากตัวเลือกที่สามารถเลือกได้
+    vector<string> uniqueColors;
+    for (const auto& color : rolledColors) {
+        if (colorCounts[color] == 1) {
+            uniqueColors.push_back(color);
+        }
+    }
+    
+    return uniqueColors;
 }
 
 Card drawFortuneCard() {
