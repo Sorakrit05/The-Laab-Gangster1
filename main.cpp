@@ -563,12 +563,12 @@ vector<string> getUniqueColors(const vector<string>& resultsColour) {
 
 void inputIngredientsByColor(Player& player, const vector<string>& colors) {
     vector<string> uniqueColors = getUniqueColors(colors);
-    unordered_map<string, unordered_set<int>> selectedIndicesPerColor; // เก็บหมายเลขที่เลือกแยกตามสี
-    unordered_map<string, vector<string>*> ingredientMap = {
-        {"\033[31mRed\033[0m", &player.recipe.mainIngredients},
-        {"\033[38;5;94mBrown\033[0m", &player.recipe.herbs},
-        {"\033[38;5;214mOrange\033[0m", &player.recipe.spices},
-        {"\033[32mGreen\033[0m", &player.recipe.specialIngredients}
+    static unordered_map<string, unordered_set<int>> selectedIndicesPerColor; // เก็บดัชนีที่เลือกไปแล้วแยกตามสี
+    unordered_map<string, vector<string>> ingredientMap = {
+        {"\033[31mRed\033[0m", player.recipe.mainIngredients},
+        {"\033[38;5;94mBrown\033[0m", player.recipe.herbs},
+        {"\033[38;5;214mOrange\033[0m", player.recipe.spices},
+        {"\033[32mGreen\033[0m", player.recipe.specialIngredients}
     };
 
     unordered_map<string, int*> ingredientCountMap = {
@@ -584,56 +584,46 @@ void inputIngredientsByColor(Player& player, const vector<string>& colors) {
             continue;
         }
 
-        // ตรวจสอบขนาดของ ingredientMap และ ingredientCountMap
-        if (ingredientMap[color]->size() <= *ingredientCountMap[color]) {
-            cout << "No more available ingredients for " << color << ".\n";
-            continue;
-        }
-
         cout << "\nPlease add the ingredients for the color " << color << ":\n";
-        vector<string>& availableIngredients = *ingredientMap[color];
+        vector<string>& availableIngredients = ingredientMap[color];
 
-        // กรองรายการเพื่อแสดงเฉพาะส่วนผสมที่ยังไม่ได้เลือก
-        vector<string> filteredIngredients;
-        unordered_map<int, int> indexMapping;
-        int displayIndex = 1;
+        // แสดงวัตถุดิบพร้อมสถานะ
+        cout << "Available ingredients for " << color << ":\n";
         for (size_t i = 0; i < availableIngredients.size(); ++i) {
-            if (selectedIndicesPerColor[color].find(i + 1) == selectedIndicesPerColor[color].end()) {
-                filteredIngredients.push_back(availableIngredients[i]);
-                indexMapping[displayIndex] = i; // แมปเลขใหม่กับตำแหน่งจริง
-                displayIndex++;
+            if (selectedIndicesPerColor[color].find(i + 1) != selectedIndicesPerColor[color].end()) {
+                cout << i + 1 << ". " << availableIngredients[i] << " (\033[33mYou already slected\033[0m)\n"; // แสดงสถานะ "หยิบไปแล้ว"
+            } else {
+                cout << i + 1 << ". " << availableIngredients[i] << "\n"; // แสดงวัตถุดิบที่ยังไม่ถูกเลือก
             }
         }
 
-        if (filteredIngredients.empty()) {
-            cout << "No more available ingredients for " << color << ".\n";
-            continue;
-        }
-
-        cout << "Available ingredients for " << color << ":\n";
-        for (size_t i = 0; i < filteredIngredients.size(); ++i) {
-            cout << i + 1 << ". " << filteredIngredients[i] << endl;
-        }
-
+        // ให้ผู้เล่นเลือกวัตถุดิบ
         bool valid = false;
         string ingredient;
 
         while (!valid) {
-            cout << "Select ingredient number (" << 1 << " - " << filteredIngredients.size() << "): ";
+            cout << "Select ingredient number (" << 1 << " - " << availableIngredients.size() << "): ";
             int index;
             cin >> index;
 
-            if (cin.fail() || index < 1 || index > filteredIngredients.size()) {
+            if (cin.fail() || index < 1 || index > availableIngredients.size()) {
                 cin.clear();
                 cin.ignore(numeric_limits<streamsize>::max(), '\n');
-                cout << "Invalid input. Please enter a number between 1 and " << filteredIngredients.size() << ".\n";
+                cout << "Invalid input. Please enter a number between 1 and " << availableIngredients.size() << ".\n";
                 continue;
             }
 
-            int originalIndex = indexMapping[index]; // แปลงกลับเป็น index ตำแหน่งจริง
-            ingredient = availableIngredients[originalIndex];
-            (*ingredientCountMap[color])++;
-            selectedIndicesPerColor[color].insert(originalIndex + 1);
+            // ตรวจสอบว่าวัตถุดิบถูกเลือกไปแล้วหรือไม่
+            if (selectedIndicesPerColor[color].find(index) != selectedIndicesPerColor[color].end()) {
+                cout << endl;
+                cout << "This ingredient has already been selected. Please choose another.\n";
+                cout << endl;
+                continue;
+            }
+
+            ingredient = availableIngredients[index - 1];
+            (*ingredientCountMap[color])++; // เพิ่มจำนวนวัตถุดิบที่รวบรวมได้
+            selectedIndicesPerColor[color].insert(index); // บันทึกดัชนีที่เลือกไปแล้ว
             valid = true;
         }
 
