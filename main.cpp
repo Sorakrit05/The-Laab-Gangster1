@@ -278,18 +278,23 @@ void displayCard(const Card& card) {
     cout << endl;
 }
 
-void shownPlayerItem(Player player) {
-    cout << setw(47) << setfill('-') << "-" << endl;
-    cout << setfill(' ');
-    cout << "| " << setw(15) << left << "Category" << "| " << setw(10) << "Amount" << "| " << setw(15) << "Want More" << "|" << endl;
-    cout << setw(47) << setfill('-') << "-" << endl;
-    cout << setfill(' ');
-    cout << "| " << setw(15) << left << "\033[1m\033[31mMeats\033[0m" << "          | " << setw(10) << player.mainIngredients << "| " << setw(15) << player.recipe.mainIngredients.size() - player.mainIngredients << "|" << endl;
-    cout << "| " << setw(15) << left << "\033[1m\033[38;5;214mSpices\033[0m" << "         | " << setw(10) << player.spices << "| " << setw(15) << player.recipe.spices.size() - player.spices << "|" << endl;
-    cout << "| " << setw(15) << left << "\033[1m\033[38;5;94mHerbs\033[0m" << "          | " << setw(10) << player.herbs << "| " << setw(15) << player.recipe.herbs.size() - player.herbs << "|" << endl;
-    cout << "| " << setw(15) << left << "\033[1m\033[32mVegetables\033[0m" << "     | " << setw(10) << player.specialIngredients << "| " << setw(15) << player.recipe.specialIngredients.size() - player.specialIngredients << "|" << endl;
-    cout << setw(47) << setfill('-') << "-" << endl;
-    cout << setfill(' ');
+void shownPlayerItem(const Player& player) {
+    // ป้องกันค่าติดลบโดยใช้ max()
+    int needMeat = max(0, (int)player.recipe.mainIngredients.size() - player.mainIngredients);
+    int needSpices = max(0, (int)player.recipe.spices.size() - player.spices);
+    int needHerbs = max(0, (int)player.recipe.herbs.size() - player.herbs);
+    int needVegetables = max(0, (int)player.recipe.specialIngredients.size() - player.specialIngredients);
+
+    cout << "\n+-------------------------------------------+\n";
+    cout << "|            \033[1mYour Ingredients\033[0m             |\n";
+    cout << "+-------------------------------------------+\n";
+    cout << "| Category      | Amount  | Need More       |\n";
+    cout << "+--------------+---------+-----------------+\n";
+    cout << "| \033[31mMeats       \033[0m | " << setw(7) << player.mainIngredients << " | " << setw(15) << needMeat << " |\n";
+    cout << "| \033[38;5;214mSpices      \033[0m | " << setw(7) << player.spices << " | " << setw(15) << needSpices << " |\n";
+    cout << "| \033[38;5;94mHerbs       \033[0m | " << setw(7) << player.herbs << " | " << setw(15) << needHerbs << " |\n";
+    cout << "| \033[32mVegetables  \033[0m | " << setw(7) << player.specialIngredients << " | " << setw(15) << needVegetables << " |\n";
+    cout << "+--------------+---------+-----------------+\n";
 }
 
 // ฟังก์ชันคืนค่ารายการสีที่ออกเพียงครั้งเดียว
