@@ -43,7 +43,10 @@ struct Player {
     int spices = 0;
     int herbs = 0;
     int specialIngredients = 0;
+    unordered_set<string> lastTurnIngredients; // เก็บส่วนผสมที่เลือกในเทิร์นที่แล้ว
 
+    // Constructor กำหนดค่าเริ่มต้น
+    Player() : mainIngredients(0), spices(0), herbs(0), specialIngredients(0) {}
 };
 
 struct IngredientInventory {
@@ -377,9 +380,29 @@ void handleIngredientReduction(Player& player, unordered_map<string, unordered_s
     }
 }
 
+bool addIngredient(Player& player, const string& color, const string& ingredient) {
+    if (player.lastTurnIngredients.find(ingredient) != player.lastTurnIngredients.end()) {
+        cout << "You cannot select the same ingredient as last round. Choose another.\n";
+        return false;
+    }
+    
+    player.lastTurnIngredients.insert(ingredient);
+    player.ingredients.push_back(ingredient);
+    
+    if (color == "\033[31mRed\033[0m") {
+        player.mainIngredients++;
+    } else if (color == "\033[38;5;214mOrange\033[0m") {
+        player.spices++;
+    } else if (color == "\033[38;5;94mBrown\033[0m") {
+        player.herbs++;
+    } else if (color == "\033[32mGreen\033[0m") {
+        player.specialIngredients++;
+    }
+    return true;
+}
+
 void inputIngredientsByColor(Player& player, const vector<string>& colors, unordered_map<string, unordered_set<string>>& previousRoundSelections) {
-    vector<string> uniqueColors = getUniqueColors(colors);
-    unordered_map<string, unordered_set<int>> selectedIndicesPerColor; // เก็บหมายเลขที่เลือกแยกตามสี
+    vector<string> uniqueColors = colors;
     unordered_map<string, vector<string>> ingredientMap = {
         {"\033[31mRed\033[0m", player.recipe.mainIngredients},
         {"\033[38;5;94mBrown\033[0m", player.recipe.herbs},
@@ -387,50 +410,33 @@ void inputIngredientsByColor(Player& player, const vector<string>& colors, unord
         {"\033[32mGreen\033[0m", player.recipe.specialIngredients}
     };
 
-    unordered_map<string, int*> ingredientCountMap = {
-        {"\033[31mRed\033[0m", &player.mainIngredients},
-        {"\033[38;5;94mBrown\033[0m", &player.herbs},
-        {"\033[38;5;214mOrange\033[0m", &player.spices},
-        {"\033[32mGreen\033[0m", &player.specialIngredients}
-    };
+    // 🔥 ล้างค่าที่เลือกไปในเทิร์นที่แล้ว เพื่อให้เลือกใหม่ได้
+    player.lastTurnIngredients.clear();
 
     for (string color : uniqueColors) {
-        // ตรวจสอบว่าสีนั้นได้รับครบแล้วหรือไม่
         if ((color == "\033[31mRed\033[0m" && player.mainIngredients >= player.recipe.mainIngredients.size()) ||
             (color == "\033[38;5;214mOrange\033[0m" && player.spices >= player.recipe.spices.size()) ||
             (color == "\033[38;5;94mBrown\033[0m" && player.herbs >= player.recipe.herbs.size()) ||
             (color == "\033[32mGreen\033[0m" && player.specialIngredients >= player.recipe.specialIngredients.size())) {
             cout << "You have already completed the " << color << " category!\n";
-            color = chooseRemainingColor(player);
-            if (color.empty()) {
-                cout << "No more categories left to complete.\n";
-                continue;
-            }
+            continue;
         }
 
-       if (ingredientMap.find(color) == ingredientMap.end()) {
-    cout << "Unknown color category: " << color << endl;
-    continue;
-}
-
+        if (ingredientMap.find(color) == ingredientMap.end()) {
+            cout << "Unknown color category: " << color << endl;
+            continue;
+        }
 
         cout << "\nPlease add the ingredients for the color " << color << ":\n";
         vector<string>& availableIngredients = ingredientMap[color];
 
-        // กรองรายการเพื่อแสดงเฉพาะส่วนผสมที่ยังไม่ได้เลือก และไม่ซ้ำรอบก่อนหน้า
         vector<string> filteredIngredients;
-        unordered_map<int, int> indexMapping;
-        int displayIndex = 1;
-        for (size_t i = 0; i < availableIngredients.size(); ++i) {
-            if (selectedIndicesPerColor[color].find(i + 1) == selectedIndicesPerColor[color].end() ||
-                previousRoundSelections[color].find(availableIngredients[i]) == previousRoundSelections[color].end()) {
-                filteredIngredients.push_back(availableIngredients[i]);
-                indexMapping[displayIndex] = i; // แมปเลขใหม่กับตำแหน่งจริง
-                displayIndex++;
+        for (const auto& ingredient : availableIngredients) {
+            if (player.lastTurnIngredients.find(ingredient) == player.lastTurnIngredients.end()) {
+                filteredIngredients.push_back(ingredient);
             }
         }
 
-        // ถ้าหากไม่มีตัวเลือกเหลือในสีนี้ ให้ข้ามไป
         if (filteredIngredients.empty()) {
             cout << "No more available ingredients for " << color << ". Skipping...\n";
             continue;
@@ -445,7 +451,7 @@ void inputIngredientsByColor(Player& player, const vector<string>& colors, unord
         string ingredient;
 
         while (!valid) {
-            cout << "Select ingredient number (" << 1 << " - " << filteredIngredients.size() << "): ";
+            cout << "Select ingredient number (1 - " << filteredIngredients.size() << "): ";
             int index;
             cin >> index;
 
@@ -456,23 +462,9 @@ void inputIngredientsByColor(Player& player, const vector<string>& colors, unord
                 continue;
             }
 
-            int originalIndex = indexMapping[index] + 1; // แปลงกลับเป็น index ตำแหน่งจริง
-            ingredient = availableIngredients[originalIndex - 1];
-
-            // ตรวจสอบว่าซ้ำกับรอบที่แล้วหรือไม่
-            if (previousRoundSelections[color].find(ingredient) != previousRoundSelections[color].end()) {
-                cout << "You cannot select the same ingredient as last round. Choose another.\n";
-                continue;
-            }
-
-            (*ingredientCountMap[color])++; // เพิ่มจำนวนส่วนผสมของสีนั้น
-            selectedIndicesPerColor[color].insert(originalIndex);
-            valid = true;
+            ingredient = filteredIngredients[index - 1];
+            valid = addIngredient(player, color, ingredient);
         }
-
-        player.ingredients.push_back(ingredient);
-        previousRoundSelections[color].insert(ingredient); // บันทึกว่าส่วนผสมนี้ถูกเลือกในรอบนี้
-        cout << "DEBUG: Selected " << ingredient << " for color " << color << ".\n";
     }
 }
 
