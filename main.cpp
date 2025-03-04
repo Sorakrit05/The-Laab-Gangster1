@@ -162,7 +162,7 @@ Card drawFortuneCard() {
 }
 
 void inputRedIngredients(Player& player) {
-    unordered_set<string> selectedIngredients; // เก็บวัตถุดิบที่เลือกไปแล้ว
+    static unordered_map<string, unordered_set<string>> selectedRedIngredientsPerPlayer; // เก็บวัตถุดิบที่เลือกไปแล้ว
 
     vector<string>& availableRedIngredients = player.recipe.mainIngredients;
 
@@ -173,7 +173,11 @@ void inputRedIngredients(Player& player) {
 
     cout << "\nAvailable red ingredients:\n";
     for (size_t i = 0; i < availableRedIngredients.size(); ++i) {
-        cout << i + 1 << ". " << availableRedIngredients[i] << endl;
+        if(selectedRedIngredientsPerPlayer[player.name].find(availableRedIngredients[i]) != selectedRedIngredientsPerPlayer[player.name].end()){
+            cout << i + 1 << ". " << availableRedIngredients[i] << " (\033[33mYou already slected\033[0m)\n";
+        } else {
+            cout << i + 1 << ". " << availableRedIngredients[i] << endl;
+        }
     }
 
     bool valid = false;
@@ -191,13 +195,13 @@ void inputRedIngredients(Player& player) {
 
         string selectedIngredient = availableRedIngredients[index - 1];
 
-        if (selectedIngredients.find(selectedIngredient) != selectedIngredients.end()) {
+        if (selectedRedIngredientsPerPlayer[player.name].find(selectedIngredient) != selectedRedIngredientsPerPlayer[player.name].end()) {
             cout << "You have already selected this ingredient. Please choose a different one.\n";
             continue;
         }
 
         player.mainIngredients++;
-        selectedIngredients.insert(selectedIngredient);
+        selectedRedIngredientsPerPlayer[player.name].insert(selectedIngredient);
         player.ingredients.push_back(selectedIngredient);
         cout << "Added: " << selectedIngredient << " to your ingredients.\n";
         valid = true;
@@ -205,7 +209,7 @@ void inputRedIngredients(Player& player) {
 }
 
 void inputBrownIngredients(Player& player) {
-    unordered_set<string> selectedIngredients;
+    static unordered_map<string, unordered_set<string>> selectedBrownIngredientsPerPlayer;
     vector<string>& availableBrownIngredients = player.recipe.herbs;
 
     if (availableBrownIngredients.empty()) {
@@ -215,7 +219,11 @@ void inputBrownIngredients(Player& player) {
 
     cout << "\nAvailable brown ingredients:\n";
     for (size_t i = 0; i < availableBrownIngredients.size(); ++i) {
-        cout << i + 1 << ". " << availableBrownIngredients[i] << endl;
+        if(selectedBrownIngredientsPerPlayer.find(availableBrownIngredients[i]) != selectedBrownIngredientsPerPlayer.end()){
+            cout << i + 1 << ". " << availableBrownIngredients[i] << " (\033[33mYou already slected\033[0m)\n";
+        } else {
+            cout << i + 1 << ". " << availableBrownIngredients[i] << endl;
+        }
     }
 
     int index;
@@ -232,13 +240,13 @@ void inputBrownIngredients(Player& player) {
 
         string selectedIngredient = availableBrownIngredients[index - 1];
 
-        if (selectedIngredients.find(selectedIngredient) != selectedIngredients.end()) {
+        if (selectedBrownIngredientsPerPlayer[player.name].find(selectedIngredient) != selectedBrownIngredientsPerPlayer[player.name].end()) {
             cout << "You have already selected this ingredient. Choose a different one.\n";
             continue;
         }
 
         player.herbs++;
-        selectedIngredients.insert(selectedIngredient);
+        selectedBrownIngredientsPerPlayer[player.name].insert(selectedIngredient);
         player.ingredients.push_back(selectedIngredient);
         cout << "Added: " << selectedIngredient << " to your ingredients.\n";
         break;
@@ -246,7 +254,7 @@ void inputBrownIngredients(Player& player) {
 }
 
 void inputOrangeIngredients(Player& player) {
-    unordered_set<string> selectedIngredients;
+    static unordered_map<string, unordered_set<string>> selectedOrangeIngredientsPerPlayer; // เก็บวัตถุดิบที่เลือกไปแล้ว
     vector<string>& availableOrangeIngredients = player.recipe.spices;
 
     if (availableOrangeIngredients.empty()) {
@@ -256,7 +264,11 @@ void inputOrangeIngredients(Player& player) {
 
     cout << "\nAvailable orange ingredients:\n";
     for (size_t i = 0; i < availableOrangeIngredients.size(); ++i) {
-        cout << i + 1 << ". " << availableOrangeIngredients[i] << endl;
+        if(selectedOrangeIngredientsPerPlayer.find(availableOrangeIngredients[i]) != selectedOrangeIngredientsPerPlayer.end()){
+            cout << i + 1 << ". " << availableOrangeIngredients[i] << " (\033[33mYou already slected\033[0m)\n";
+        } else {
+            cout << i + 1 << ". " << availableOrangeIngredients[i] << endl;
+        }
     }
 
     int index;
@@ -273,13 +285,13 @@ void inputOrangeIngredients(Player& player) {
 
         string selectedIngredient = availableOrangeIngredients[index - 1];
 
-        if (selectedIngredients.find(selectedIngredient) != selectedIngredients.end()) {
+        if (selectedOrangeIngredientsPerPlayer[player.name].find(selectedIngredient) != selectedOrangeIngredientsPerPlayer[player.name].end()) {
             cout << "You have already selected this ingredient. Choose a different one.\n";
             continue;
         }
 
         player.spices++;
-        selectedIngredients.insert(selectedIngredient);
+        selectedOrangeIngredientsPerPlayer[player.name].insert(selectedIngredient);
         player.ingredients.push_back(selectedIngredient);
         cout << "Added: " << selectedIngredient << " to your ingredients.\n";
         break;
@@ -287,7 +299,7 @@ void inputOrangeIngredients(Player& player) {
 }
 
 void inputGreenIngredients(Player& player) {
-    unordered_set<string> selectedIngredients;
+    static unordered_map<string, unordered_set<string>> selectedGreenIngredientsPerPlayer;
     vector<string>& availableGreenIngredients = player.recipe.specialIngredients;
 
     if (availableGreenIngredients.empty()) {
@@ -297,7 +309,11 @@ void inputGreenIngredients(Player& player) {
 
     cout << "\nAvailable green ingredients:\n";
     for (size_t i = 0; i < availableGreenIngredients.size(); ++i) {
-        cout << i + 1 << ". " << availableGreenIngredients[i] << endl;
+        if(selectedGreenIngredientsPerPlayer.find(availableGreenIngredients[i]) != selectedGreenIngredientsPerPlayer.end()){
+            cout << i + 1 << ". " << availableGreenIngredients[i] << " (\033[33mYou already slected\033[0m)\n";
+        } else {
+            cout << i + 1 << ". " << availableGreenIngredients[i] << endl;
+        }
     }
 
     int index;
@@ -314,13 +330,13 @@ void inputGreenIngredients(Player& player) {
 
         string selectedIngredient = availableGreenIngredients[index - 1];
 
-        if (selectedIngredients.find(selectedIngredient) != selectedIngredients.end()) {
+        if (selectedGreenIngredientsPerPlayer.find(selectedIngredient) != selectedGreenIngredientsPerPlayer.end()) {
             cout << "You have already selected this ingredient. Choose a different one.\n";
             continue;
         }
 
         player.specialIngredients++;
-        selectedIngredients.insert(selectedIngredient);
+        selectedGreenIngredientsPerPlayer.insert(selectedIngredient);
         player.ingredients.push_back(selectedIngredient);
         cout << "Added: " << selectedIngredient << " to your ingredients.\n";
         break;
@@ -566,7 +582,8 @@ vector<string> getUniqueColors(const vector<string>& resultsColour) {
 
 void inputIngredientsByColor(Player& player, const vector<string>& colors) {
     vector<string> uniqueColors = getUniqueColors(colors);
-    static unordered_map<string, unordered_set<int>> selectedIndicesPerColor; // เก็บดัชนีที่เลือกไปแล้วแยกตามสี
+    static unordered_map<string, unordered_map<string, unordered_set<int>>> selectedIndicesPerPlayer; // แยกตามผู้เล่น
+    static unordered_map<string, unordered_map<string, unordered_set<string>>> selectedIngredientsPerPlayer; // แยก selectedIngredients ตามผู้เล่น
     unordered_map<string, vector<string>> ingredientMap = {
         {"\033[31mRed\033[0m", player.recipe.mainIngredients},
         {"\033[38;5;94mBrown\033[0m", player.recipe.herbs},
@@ -587,60 +604,49 @@ void inputIngredientsByColor(Player& player, const vector<string>& colors) {
             continue;
         }
 
-        cout << "\nPlease add the ingredients for the color " << color << ":\n";
+        cout << "\nPlease select an ingredient for " << color << " category:\n";
         vector<string>& availableIngredients = ingredientMap[color];
 
-        // ตรวจสอบว่าวัตถุดิบทั้งหมดในหมวดหมู่นี้ถูกเลือกไปแล้วหรือไม่
-        if (selectedIndicesPerColor[color].size() == availableIngredients.size()) {
-            cout << endl;
-            cout << "You have already selected all ingredients for " << color << ".\n";
+        if (availableIngredients.empty()) {
+            cout << "No available ingredients for " << color << "\n";
             continue;
         }
 
-        // แสดงวัตถุดิบพร้อมสถานะ
-        cout << "Available ingredients for " << color << ":\n";
         for (size_t i = 0; i < availableIngredients.size(); ++i) {
-            if (selectedIndicesPerColor[color].find(i + 1) != selectedIndicesPerColor[color].end()) {
-                cout << i + 1 << ". " << availableIngredients[i] << " \033[34m(You already have)\033[0m\n"; // แสดงสถานะ "หยิบไปแล้ว"
+            if (selectedIndicesPerPlayer[player.name][color].find(i + 1) != selectedIndicesPerPlayer[player.name][color].end()) {
+                cout << i + 1 << ". " << availableIngredients[i] << " (\033[33mYou already selected\033[0m)\n";
             } else {
-                cout << i + 1 << ". " << availableIngredients[i] << "\n"; // แสดงวัตถุดิบที่ยังไม่ถูกเลือก
+                cout << i + 1 << ". " << availableIngredients[i] << "\n";
             }
         }
 
-        // ให้ผู้เล่นเลือกวัตถุดิบ
-        bool valid = false;
-        string ingredient;
-
-        while (!valid) {
-            cout << "Select ingredient number (" << 1 << " - " << availableIngredients.size() << "): ";
-            int index;
+        int index;
+        while (true) {
+            cout << "Select ingredient number (1 - " << availableIngredients.size() << "): ";
             cin >> index;
 
             if (cin.fail() || index < 1 || index > availableIngredients.size()) {
                 cin.clear();
                 cin.ignore(numeric_limits<streamsize>::max(), '\n');
-                cout << "Invalid input. Please enter a number between 1 and " << availableIngredients.size() << ".\n";
+                cout << "Invalid input. Please enter a valid number.\n";
                 continue;
             }
 
-            // ตรวจสอบว่าวัตถุดิบถูกเลือกไปแล้วหรือไม่
-            if (selectedIndicesPerColor[color].find(index) != selectedIndicesPerColor[color].end()) {
-                cout << endl;
-                cout << "This ingredient has already been selected. Please choose another.\n";
-                cout << endl;
+            if (selectedIndicesPerPlayer[player.name][color].find(index) != selectedIndicesPerPlayer[player.name][color].end()) {
+                cout << "\nThis ingredient has already been selected. Please choose another.\n\n";
                 continue;
             }
 
-            ingredient = availableIngredients[index - 1];
-            (*ingredientCountMap[color])++; // เพิ่มจำนวนวัตถุดิบที่รวบรวมได้
-            selectedIndicesPerColor[color].insert(index); // บันทึกดัชนีที่เลือกไปแล้ว
-            valid = true;
+            string selectedIngredient = availableIngredients[index - 1];
+            player.ingredients.push_back(selectedIngredient);
+            (*ingredientCountMap[color])++;
+            selectedIndicesPerPlayer[player.name][color].insert(index);
+            cout << "Added: " << selectedIngredient << " to your ingredients.\n";
+            break;
         }
-
-        player.ingredients.push_back(ingredient);
-        cout << "Added: " << ingredient << " to your ingredients.\n";
     }
 }
+
 
 bool Winner(Player player){
     if(player.mainIngredients < player.recipe.mainIngredients.size()){

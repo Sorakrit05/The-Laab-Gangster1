@@ -61,7 +61,8 @@
     "iostream": "cpp",
     "unordered_map": "cpp",
     "*.tcc": "cpp",
-    "ostream": "cpp"
+    "ostream": "cpp",
+    "unordered_set": "cpp"
   },
   "C_Cpp.errorSquiggles": "disabled"
 }
