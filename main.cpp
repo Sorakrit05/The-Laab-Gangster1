@@ -309,8 +309,8 @@ void inputGreenIngredients(Player& player) {
 
     cout << "\nAvailable green ingredients:\n";
     for (size_t i = 0; i < availableGreenIngredients.size(); ++i) {
-        if(selectedGreenIngredientsPerPlayer.find(availableGreenIngredients[i]) != selectedGreenIngredientsPerPlayer.end()){
-            cout << i + 1 << ". " << availableGreenIngredients[i] << " (\033[33mYou already slected\033[0m)\n";
+        if (selectedGreenIngredientsPerPlayer[player.name].find(availableGreenIngredients[i]) != selectedGreenIngredientsPerPlayer[player.name].end()) {
+            cout << i + 1 << ". " << availableGreenIngredients[i] << " (\033[33mYou already selected\033[0m)\n";
         } else {
             cout << i + 1 << ". " << availableGreenIngredients[i] << endl;
         }
@@ -330,18 +330,20 @@ void inputGreenIngredients(Player& player) {
 
         string selectedIngredient = availableGreenIngredients[index - 1];
 
-        if (selectedGreenIngredientsPerPlayer.find(selectedIngredient) != selectedGreenIngredientsPerPlayer.end()) {
+        if (selectedGreenIngredientsPerPlayer[player.name].find(selectedIngredient) != selectedGreenIngredientsPerPlayer[player.name].end()) {
             cout << "You have already selected this ingredient. Choose a different one.\n";
             continue;
         }
 
         player.specialIngredients++;
-        selectedGreenIngredientsPerPlayer.insert(selectedIngredient);
+        selectedGreenIngredientsPerPlayer[player.name].insert(selectedIngredient);
+
         player.ingredients.push_back(selectedIngredient);
         cout << "Added: " << selectedIngredient << " to your ingredients.\n";
         break;
     }
 }
+
 
 void removeIngredient(Player& player, const string& colorCategory) {
     vector<string>* ingredientList;
@@ -704,7 +706,7 @@ void displayWinner(const string& winnerName) {
     cout << "\n******************************************\n";
     cout << "*                                        *\n";
     cout << "*           CONGRATULATIONS!             *\n";
-    cout << "*  🔥  You are the Real gangster laab 🔥   *\n";
+    cout << "*    You are the Real gangster laab      *\n";
     cout << "*       "<< winnerName << " is the winner!               *\n";
     cout << "*                                        *\n";
     cout << "******************************************\n";
