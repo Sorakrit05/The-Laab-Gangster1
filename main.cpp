@@ -223,7 +223,7 @@ void inputRedIngredients(Player& player, const string& colors) {
             continue;
         }
             player.ingredients.push_back(selectedIngredient);
-            (player.ingredientCountMap[colors])++;
+            player.mainIngredients++;
             player.selectedIndicesPerColor[colors].insert(index);
         cout << "Added: " << selectedIngredient << " to your ingredients.\n";
         valid = true;
@@ -268,7 +268,7 @@ void inputBrownIngredients(Player& player, const string& colors) {
         }
 
         player.ingredients.push_back(selectedIngredient);
-        (player.ingredientCountMap[colors])++;
+        player.herbs++;
         player.selectedIndicesPerColor[colors].insert(index);
         cout << "Added: " << selectedIngredient << " to your ingredients.\n";
         break;
@@ -312,7 +312,7 @@ void inputOrangeIngredients(Player& player, const string& colors) {
         }
 
         player.ingredients.push_back(selectedIngredient);
-        (player.ingredientCountMap[colors])++;
+        player.spices++;
         player.selectedIndicesPerColor[colors].insert(index);
         cout << "Added: " << selectedIngredient << " to your ingredients.\n";
         break;
@@ -356,7 +356,7 @@ void inputGreenIngredients(Player& player, const string& colors) {
         }
 
         player.ingredients.push_back(selectedIngredient);
-        (player.ingredientCountMap[colors])++;
+        player.specialIngredients++;
         player.selectedIndicesPerColor[colors].insert(index);
         cout << "Added: " << selectedIngredient << " to your ingredients.\n";
         break;
@@ -367,21 +367,21 @@ void removeIngredient(Player& player, const string& colors) {
     vector<string>& ingredientList = player.ingredientMap[colors];
     int* ingredientCount = player.ingredientCountMap[colors];
 
-    // ค้นหาวัตถุดิบที่ผู้เล่นมีอยู่ (ไม่ซ้ำกัน)
-    unordered_set<string> ownedIngredientsSet; // ใช้ set เพื่อป้องกันวัตถุดิบซ้ำ
-    for (const string& ingredient : player.ingredients) {
-        if (find(ingredientList.begin(), ingredientList.end(), ingredient) != ingredientList.end()) {
-            ownedIngredientsSet.insert(ingredient);
+    // ตรวจสอบวัตถุดิบที่ผู้เล่นมี
+    vector<string> ownedIngredients;
+    vector<int> ownedIndices;
+
+    for (size_t i = 0; i < player.ingredients.size(); ++i) {
+        if (find(ingredientList.begin(), ingredientList.end(), player.ingredients[i]) != ingredientList.end()) {
+            ownedIngredients.push_back(player.ingredients[i]);
+            ownedIndices.push_back(i);
         }
     }
 
-    if (ownedIngredientsSet.empty()) {
+    if (ownedIngredients.empty()) {
         cout << "You have no " << colors << " ingredients to remove.\n";
         return;
     }
-
-    // แปลง set เป็น vector เพื่อแสดงรายการ
-    vector<string> ownedIngredients(ownedIngredientsSet.begin(), ownedIngredientsSet.end());
 
     // แสดงรายการที่สามารถลบได้
     cout << "\nAvailable " << colors << " ingredients to remove:\n";
@@ -403,25 +403,51 @@ void removeIngredient(Player& player, const string& colors) {
 
         string removedIngredient = ownedIngredients[index - 1];
 
-        // ลบจากรายการของผู้เล่น
+        // ลบจาก `player.ingredients`
         player.ingredients.erase(remove(player.ingredients.begin(), player.ingredients.end(), removedIngredient), player.ingredients.end());
 
-        // ลดจำนวนของวัตถุดิบนั้น
+        // ลดจำนวนของประเภทวัตถุดิบที่ถูกลบ
         (*ingredientCount)--;
 
+        // เคลียร์ค่าจาก `selectedIndicesPerColor` และ `selectedIngredientsPerColor`
+        auto it = player.selectedIngredientsPerColor[colors].find(removedIngredient);
+        if (it != player.selectedIngredientsPerColor[colors].end()) {
+            player.selectedIngredientsPerColor[colors].erase(it);
+        }
+
+        // ลบค่า index ออกจาก `selectedIndicesPerColor`
+        for (auto it2 = player.selectedIndicesPerColor[colors].begin(); it2 != player.selectedIndicesPerColor[colors].end(); ) {
+            if (*it2 == ownedIndices[index - 1] + 1) {  // +1 เพราะ index เริ่มจาก 1
+                it2 = player.selectedIndicesPerColor[colors].erase(it2);
+            } else {
+                ++it2;
+            }
+        }
+
         cout << "Removed: " << removedIngredient << " from your ingredients.\n";
+
+        // แสดงค่าที่เหลือใน `selectedIngredientsPerColor` เพื่อตรวจสอบว่าลบสำเร็จ
+        cout << "Remaining selected ingredients in " << colors << ": ";
+        for (const auto& ing : player.selectedIngredientsPerColor[colors]) {
+            cout << ing << ", ";
+        }
+        cout << endl;
+
         break;
     }
 }
 
 
+
+
+
 Player handleCardEffect(Player player, const Card& card) {
     if (card.name == "Suan Krua") {
-        inputBrownIngredients(player,"\033[38;5;94mBrown\033[0m");
-        if (player.herbs > player.recipe.herbs.size()) {
-            player.herbs--; // Remove the extra one
-
-            // Distribute to other categories if available
+        if (player.herbs < player.recipe.herbs.size()) {
+            inputBrownIngredients(player,"\033[38;5;94mBrown\033[0m");
+        }
+        else  {
+        
             if (player.mainIngredients < player.recipe.mainIngredients.size()) {
                 inputRedIngredients(player,"\033[31mRed\033[0m");
             }
@@ -430,18 +456,23 @@ Player handleCardEffect(Player player, const Card& card) {
             }
             else if (player.specialIngredients < player.recipe.specialIngredients.size()) {
                 inputGreenIngredients(player,"\033[32mGreen\033[0m");
-            }   
+            } 
+            else {
+                cout << "No more ingredients needed for this category.\n";
+            }  
         }
     }
     else if (card.name == "Moitgure") {
-        removeIngredient(player, "Brown");
+        removeIngredient(player, "\033[38;5;94mBrown\033[0m");
         if (player.herbs < 0) {
             player.herbs = 0;
         }
     }
     else if (card.name == "Regular Customer") {
+        if (player.mainIngredients < player.recipe.mainIngredients.size()) {
         inputRedIngredients(player,"\033[31mRed\033[0m");
-        if (player.mainIngredients > player.recipe.mainIngredients.size()) {
+        }
+        else  {
             player.mainIngredients--;
             if (player.spices < player.recipe.spices.size()) {
                 inputOrangeIngredients(player,"\033[38;5;214mOrange\033[0m");
@@ -452,18 +483,23 @@ Player handleCardEffect(Player player, const Card& card) {
             else if (player.specialIngredients < player.recipe.specialIngredients.size()) {
                 inputGreenIngredients(player,"\033[32mGreen\033[0m");
             }
+            else {
+                cout << "No more ingredients needed for this category.\n";
+            }
         }
     }
     else if (card.name == "Moldy Cutting Board") {
-        removeIngredient(player, "Red");
+        removeIngredient(player,"\033[31mRed\033[0m");
         if (player.mainIngredients < 0) {
             player.mainIngredients = 0;
         }
     }
     else if (card.name == "The Kitchen") {
-        inputOrangeIngredients(player,"\033[38;5;214mOrange\033[0m");
-        if (player.spices > player.recipe.spices.size()) {
-            player.spices--;
+        if(player.spices < player.recipe.spices.size()){
+            inputOrangeIngredients(player,"\033[38;5;214mOrange\033[0m");
+        }
+        else {
+        
             if (player.mainIngredients < player.recipe.mainIngredients.size()) {
                 inputRedIngredients(player,"\033[31mRed\033[0m");
             }
@@ -473,11 +509,17 @@ Player handleCardEffect(Player player, const Card& card) {
             else if (player.specialIngredients < player.recipe.specialIngredients.size()) {
                 inputGreenIngredients(player,"\033[32mGreen\033[0m");
             }
+            else {
+                cout << "No more ingredients needed for this category.\n";
+            }
         }
+        
     }
     else if (card.name == "Rainy Season") {
-        inputGreenIngredients(player,"\033[32mGreen\033[0m");
-        if (player.specialIngredients > player.recipe.specialIngredients.size()) {
+        if (player.specialIngredients < player.recipe.specialIngredients.size()){
+            inputGreenIngredients(player,"\033[32mGreen\033[0m");
+            }
+        else  {
             player.specialIngredients--;
             if (player.mainIngredients < player.recipe.mainIngredients.size()) {
                 inputRedIngredients(player,"\033[31mRed\033[0m");
@@ -488,16 +530,19 @@ Player handleCardEffect(Player player, const Card& card) {
             else if (player.herbs < player.recipe.herbs.size()) {
                 inputBrownIngredients(player,"\033[38;5;94mBrown\033[0m");
             }
+            else {
+                cout << "No more ingredients needed for this category.\n";
+            }
         }
     }
     else if (card.name == "Falling Mortar") {
-        removeIngredient(player, "Orange");
+        removeIngredient(player, "\033[38;5;214mOrange\033[0m");
         if (player.spices < 0) {
             player.spices = 0;
         }
     }
     else if (card.name == "Falling Tray") {
-        removeIngredient(player, "Green");
+        removeIngredient(player, "\033[32mGreen\033[0m");
         if (player.specialIngredients < 0) {
             player.specialIngredients = 0;
         }
@@ -593,8 +638,8 @@ void inputIngredientsByColor(Player& player, const vector<string>& colors) {
         cout << "\nPlease select an ingredient for " << color << " category:\n";
         vector<string>& availableIngredients = player.ingredientMap[color];
 
-        if (availableIngredients.empty()) {
-            cout << "No available ingredients for " << color << "\n";
+        if (player.selectedIndicesPerColor[color].size() == availableIngredients.size()) {
+            cout << "No more ingredients needed for this " << color << "\n";
             continue;
         }
 
@@ -624,6 +669,7 @@ void inputIngredientsByColor(Player& player, const vector<string>& colors) {
             }
 
             string selectedIngredient = availableIngredients[index - 1];
+            player.ingredients.push_back(selectedIngredient);
             (*player.ingredientCountMap[color])++;
             player.selectedIndicesPerColor[color].insert(index);
             cout << "Added: " << selectedIngredient << " to your ingredients.\n";
