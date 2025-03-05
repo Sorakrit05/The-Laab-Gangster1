@@ -109,12 +109,6 @@ vector<Ingredient> spices = {
     {"Cardamom", "spices"}, {"Chili Spur Pepper", "spices"}, {"Caraway", "spices"}
 };
 
-
-// สำหรับใช้ฟังก์ชัน system()
-void clearScreen() {
-    system("clear");
-}
-
 // ฟังก์ชันสุ่มสูตรลาบ
 LarbRecipe drawLarbRecipe() {
     return recipes[rand() % recipes.size()];
@@ -154,16 +148,12 @@ vector<string> rollFourSideDice() {
     cout << "The dice are rolling... ";
     cout.flush();
 
-    // Simulate dice rolling animation with changing colors
-    for (int i = 0; i < 10; ++i) {
-        for (int j = 0; j < 4; ++j) {
-            cout << Colors[rand() % 4] << " ";
-        }
+    // Simulate dice rolling animation
+    for (int i = 0; i < 5; ++i) {
+        cout << ". ";
         cout.flush();
-        std::this_thread::sleep_for(chrono::milliseconds(100));
-        cout << "\r" << string(50, ' ') << "\r"; // Clear the line
+        std::this_thread::sleep_for(chrono::milliseconds(300));
     }
-
     cout << "Done!" << endl;
     std::this_thread::sleep_for(chrono::milliseconds(500));
 
@@ -172,7 +162,7 @@ vector<string> rollFourSideDice() {
         int roll = (rand() % 4);
         cout << Colors[roll] << " ";
         resultsColour.push_back(Colors[roll]);
-        std::this_thread::sleep_for(chrono::milliseconds(300));
+        std::this_thread::sleep_for(chrono::milliseconds(250));
     }
     cout << endl;
 
@@ -182,13 +172,9 @@ vector<string> rollFourSideDice() {
 Card drawFortuneCard() {
     vector<Card> cards = {
         {"Suan Krua", "Many of the spices in Chili Laap are found in Lanna gardens and today you have the opportunity to visit that garden and pick up the brown spices you want."},
-        {"Moitgure", "Good chili paste is dry. Moisture causes chili paste to clump and mold. Your spices have moisture that will ruin your chili paste. Pick up 1 brown spice and return it to the center pile."},
         {"Regular Customer", "Being a regular at the butcher shop gives you the chance to choose quality meat before anyone else. Pick up one of the red tokens."},
-        {"Moldy Cutting Board", "The cutting board for making larb must be dry and clean. Failure to store the cutting board causes mold and damages the meat. Pick up 1 red poden. Return to the center pile."},
         {"The Kitchen", "Many of the spices in chili paste are found in the kitchen garden. Just pick up one orange spice of your choice."},
         {"Rainy Season", "The humid rainy season brings forth many kinds of vegetables that are perfect for eating with laab. Pick up any green token you want."},
-        {"Falling Mortar", "Mortar is a tool used to finely pound spices and turn them into chili paste. Your mortar spoiled the prepared spices. Pick up 1 orange spice and return it to the center pile."},
-        {"Falling Tray", "You prepared the vegetables and the laab well, but unfortunately you made 1 piece of green yin poden tray back to the center."}
     };
 
     int randomCards = rand() % cards.size();
@@ -204,7 +190,7 @@ void inputRedIngredients(Player& player, const string& colors) {
         return;
     }
 
-    cout << "\nAvailable \033[31mRed\033[0m ingredients:\n";
+    cout << "\nAvailable red ingredients:\n";
     for (size_t i = 0; i < availableRedIngredients.size(); ++i) {
         if(player.selectedIndicesPerColor[colors].find(i + 1) != player.selectedIndicesPerColor[colors].end()){
             cout << i + 1 << ". " << availableRedIngredients[i] << " (\033[33mYou already slected\033[0m)\n";
@@ -216,7 +202,7 @@ void inputRedIngredients(Player& player, const string& colors) {
     bool valid = false;
     int index;
     while (!valid) {
-        cout << "Select a \033[31mRed\033[0m ingredient number (1 - " << availableRedIngredients.size() << "): ";
+        cout << "Select a red ingredient number (1 - " << availableRedIngredients.size() << "): ";
         cin >> index;
 
         if (cin.fail() || index < 1 || index > availableRedIngredients.size()) {
@@ -232,9 +218,9 @@ void inputRedIngredients(Player& player, const string& colors) {
             cout << "You have already selected this ingredient. Please choose a different one.\n";
             continue;
         }
-        player.selectedIngredientsPerColor[colors].insert(selectedIngredient);
-        player.mainIngredients++;
-        player.selectedIndicesPerColor[colors].insert(index);
+            player.ingredients.push_back(selectedIngredient);
+            player.mainIngredients++;
+            player.selectedIndicesPerColor[colors].insert(index);
         cout << "Added: " << selectedIngredient << " to your ingredients.\n";
         valid = true;
     }
@@ -249,7 +235,7 @@ void inputBrownIngredients(Player& player, const string& colors) {
         return;
     }
 
-    cout << "\nAvailable \033[38;5;94mBrown\033[0m ingredients:\n";
+    cout << "\nAvailable brown ingredients:\n";
     for (size_t i = 0; i < availableBrownIngredients.size(); ++i) {
         if(player.selectedIndicesPerColor[colors].find(i + 1) != player.selectedIndicesPerColor[colors].end()){
             cout << i + 1 << ". " << availableBrownIngredients[i] << " (\033[33mYou already selected\033[0m)\n";
@@ -260,7 +246,7 @@ void inputBrownIngredients(Player& player, const string& colors) {
 
     int index;
     while (true) {
-        cout << "Select a \033[38;5;94mBrown\033[0m ingredient number (1 - " << availableBrownIngredients.size() << "): ";
+        cout << "Select a brown ingredient number (1 - " << availableBrownIngredients.size() << "): ";
         cin >> index;
 
         if (cin.fail() || index < 1 || index > availableBrownIngredients.size()) {
@@ -277,7 +263,7 @@ void inputBrownIngredients(Player& player, const string& colors) {
             continue;
         }
 
-        player.selectedIngredientsPerColor[colors].insert(selectedIngredient);
+        player.ingredients.push_back(selectedIngredient);
         player.herbs++;
         player.selectedIndicesPerColor[colors].insert(index);
         cout << "Added: " << selectedIngredient << " to your ingredients.\n";
@@ -293,7 +279,7 @@ void inputOrangeIngredients(Player& player, const string& colors) {
         return;
     }
 
-    cout << "\nAvailable \033[38;5;214mOrange\033[0m ingredients:\n";
+    cout << "\nAvailable orange ingredients:\n";
     for (size_t i = 0; i < availableOrangeIngredients.size(); ++i) {
         if(player.selectedIndicesPerColor[colors].find(i + 1) != player.selectedIndicesPerColor[colors].end()){
             cout << i + 1 << ". " << availableOrangeIngredients[i] << " (\033[33mYou already selected\033[0m)\n";
@@ -304,7 +290,7 @@ void inputOrangeIngredients(Player& player, const string& colors) {
 
     int index;
     while (true) {
-        cout << "Select an \033[38;5;214mOrange\033[0m ingredient number (1 - " << availableOrangeIngredients.size() << "): ";
+        cout << "Select an orange ingredient number (1 - " << availableOrangeIngredients.size() << "): ";
         cin >> index;
 
         if (cin.fail() || index < 1 || index > availableOrangeIngredients.size()) {
@@ -321,7 +307,7 @@ void inputOrangeIngredients(Player& player, const string& colors) {
             continue;
         }
 
-        player.selectedIngredientsPerColor[colors].insert(selectedIngredient);
+        player.ingredients.push_back(selectedIngredient);
         player.spices++;
         player.selectedIndicesPerColor[colors].insert(index);
         cout << "Added: " << selectedIngredient << " to your ingredients.\n";
@@ -337,7 +323,7 @@ void inputGreenIngredients(Player& player, const string& colors) {
         return;
     }
 
-    cout << "\nAvailable \033[32mGreen\033[0m ingredients:\n";
+    cout << "\nAvailable green ingredients:\n";
     for (size_t i = 0; i < availableGreenIngredients.size(); ++i) {
         if (player.selectedIndicesPerColor[colors].find(i + 1) != player.selectedIndicesPerColor[colors].end()) {
             cout << i + 1 << ". " << availableGreenIngredients[i] << " (\033[33mYou already selected\033[0m)\n";
@@ -348,7 +334,7 @@ void inputGreenIngredients(Player& player, const string& colors) {
 
     int index;
     while (true) {
-        cout << "Select a \033[32mGreen\033[0m ingredient number (1 - " << availableGreenIngredients.size() << "): ";
+        cout << "Select a green ingredient number (1 - " << availableGreenIngredients.size() << "): ";
         cin >> index;
 
         if (cin.fail() || index < 1 || index > availableGreenIngredients.size()) {
@@ -365,7 +351,7 @@ void inputGreenIngredients(Player& player, const string& colors) {
             continue;
         }
 
-        player.selectedIngredientsPerColor[colors].insert(selectedIngredient);
+        player.ingredients.push_back(selectedIngredient);
         player.specialIngredients++;
         player.selectedIndicesPerColor[colors].insert(index);
         cout << "Added: " << selectedIngredient << " to your ingredients.\n";
@@ -373,131 +359,6 @@ void inputGreenIngredients(Player& player, const string& colors) {
     }
 }
 
-void removeIngredient(Player& player, const string& colors) {
-    unordered_set<int>& selectedIndices = player.selectedIndicesPerColor[colors];
-    unordered_set<string>& selectedIngredients = player.selectedIngredientsPerColor[colors];
-    vector<string>& ingredientList = player.ingredientMap[colors];
-
-    if (selectedIndices.empty()) {
-        cout << "You have no " << colors << " ingredients to remove.\n";
-        return;
-    }
-
-    // แสดงรายการที่สามารถลบได้
-    cout << "\nAvailable " << colors << " ingredients to remove:\n";
-    for (const int& index : selectedIndices) {
-        cout << index << ". " << ingredientList[index - 1] << endl;
-    }
-
-    int index;
-    while (true) {
-        cout << "Select an ingredient number to \033[31m!!! R E M O V E !!!\033[0m (";
-        for (auto it = selectedIndices.begin(); it != selectedIndices.end(); ++it) {
-            if (it != selectedIndices.begin()) {
-                cout << ", ";
-            }
-            cout << *it;
-        }
-        cout << "): ";
-        cin >> index;
-        cout << endl;
-
-        if (cin.fail() || selectedIndices.find(index) == selectedIndices.end()) {
-            cin.clear();
-            cin.ignore(numeric_limits<streamsize>::max(), '\n');
-            cout << "Invalid input. Please enter a valid number.\n";
-            continue;
-        }
-
-        string removedIngredient = ingredientList[index - 1];
-
-        // ลดจำนวนของประเภทวัตถุดิบที่ถูกลบ
-        if (colors == "\033[31mRed\033[0m") {
-            player.mainIngredients--;
-        } else if (colors == "\033[38;5;94mBrown\033[0m") {
-            player.herbs--;
-        } else if (colors == "\033[38;5;214mOrange\033[0m") {
-            player.spices--;
-        } else if (colors == "\033[32mGreen\033[0m") {
-            player.specialIngredients--;
-        }
-
-        // ลบค่า index ออกจาก `selectedIndicesPerColor`
-        // และลบวัตถุดิบออกจาก `selectedIngredientsPerColor`
-        selectedIndices.erase(index);
-        selectedIngredients.erase(removedIngredient);
-
-        cout << "Removed: " << removedIngredient << " from your ingredients.\n";
-        cout << endl;
-        break;
-    }
-}
-
-void inputIngredientsByColor(Player& player, const vector<string>& colors) {
-    for (const string& color : colors) {
-        if (player.ingredientMap.find(color) == player.ingredientMap.end()) {
-            cout << "Unknown color category: " << color << endl;
-            continue;
-        }
-
-        cout << "\nPlease select an ingredient for " << color << " category:\n";
-        vector<string>& availableIngredients = player.ingredientMap[color];
-
-        if (player.selectedIndicesPerColor[color].size() == availableIngredients.size()) {
-            cout << "No more ingredients needed for this "<< color <<".Plese select other COLOR ! ! !" << "\n";
-            if (player.mainIngredients < player.recipe.mainIngredients.size()) {
-                inputRedIngredients(player,"\033[31mRed\033[0m");
-            }
-            else if (player.spices < player.recipe.spices.size()) {
-                inputOrangeIngredients(player,"\033[38;5;214mOrange\033[0m");
-            }
-            else if (player.specialIngredients < player.recipe.specialIngredients.size()) {
-                inputGreenIngredients(player,"\033[32mGreen\033[0m");
-            }
-            else if (player.herbs < player.recipe.herbs.size()) {
-                inputBrownIngredients(player,"\033[38;5;94mBrown\033[0m");
-            } 
-            continue;
-        }
-
-        for (size_t i = 0; i < availableIngredients.size(); ++i) {
-            if (player.selectedIndicesPerColor[color].find(i + 1) != player.selectedIndicesPerColor[color].end()) {
-                cout << i + 1 << ". " << availableIngredients[i] << " (\033[33mYou already selected\033[0m)\n";
-            } else {
-                cout << i + 1 << ". " << availableIngredients[i] << "\n";
-            }
-        }
-
-        int index;
-        while (true) {
-            cout << "Select ingredient number (1 - " << availableIngredients.size() << "): ";
-            cin >> index;
-
-            if (cin.fail() || index < 1 || index > availableIngredients.size()) {
-                cin.clear();
-                cin.ignore(numeric_limits<streamsize>::max(), '\n');
-                cout << "Invalid input. Please enter a valid number.\n";
-                continue;
-            }
-
-            if (player.selectedIndicesPerColor[color].find(index) != player.selectedIndicesPerColor[color].end()) {
-                cout << "\nThis ingredient has already been selected. Please choose another.\n\n";
-                continue;
-            }
-
-            string selectedIngredient = availableIngredients[index - 1];
-            player.selectedIngredientsPerColor[color].insert(selectedIngredient);
-            if (player.ingredientCountMap.find(color) != player.ingredientCountMap.end()) {
-                (*player.ingredientCountMap[color])++;
-            } else {
-                cout << "Error: ingredientCountMap does not contain " << color << endl;
-            }
-            player.selectedIndicesPerColor[color].insert(index);
-            cout << "Added: " << selectedIngredient << " to your ingredients.\n";
-            break;
-        }
-    }
-}
 
 Player handleCardEffect(Player player, const Card& card) {
     if (card.name == "Suan Krua") {
@@ -505,8 +366,6 @@ Player handleCardEffect(Player player, const Card& card) {
             inputBrownIngredients(player,"\033[38;5;94mBrown\033[0m");
         }
         else  {
-            cout << "No more ingredients needed for this \033[38;5;94mBrown\033[0m.Plese select other COLOR ! ! !" << "\n";
-        
             if (player.mainIngredients < player.recipe.mainIngredients.size()) {
                 inputRedIngredients(player,"\033[31mRed\033[0m");
             }
@@ -521,18 +380,11 @@ Player handleCardEffect(Player player, const Card& card) {
             }  
         }
     }
-    else if (card.name == "Moitgure") {
-        removeIngredient(player, "\033[38;5;94mBrown\033[0m");
-        if (player.herbs < 0) {
-            player.herbs = 0;
-        }
-    }
     else if (card.name == "Regular Customer") {
         if (player.mainIngredients < player.recipe.mainIngredients.size()) {
         inputRedIngredients(player,"\033[31mRed\033[0m");
         }
         else  {
-            cout << "No more ingredients needed for this \033[31mRed\033[0m.Plese select other COLOR ! ! !" << "\n";
             if (player.spices < player.recipe.spices.size()) {
                 inputOrangeIngredients(player,"\033[38;5;214mOrange\033[0m");
             }
@@ -547,19 +399,11 @@ Player handleCardEffect(Player player, const Card& card) {
             }
         }
     }
-    else if (card.name == "Moldy Cutting Board") {
-        removeIngredient(player,"\033[31mRed\033[0m");
-        if (player.mainIngredients < 0) {
-            player.mainIngredients = 0;
-        }
-    }
     else if (card.name == "The Kitchen") {
         if(player.spices < player.recipe.spices.size()){
             inputOrangeIngredients(player,"\033[38;5;214mOrange\033[0m");
         }
         else {
-            cout << "No more ingredients needed for this \033[38;5;214mOrange\033[0m.Plese select other COLOR ! ! !" << "\n";
-        
             if (player.mainIngredients < player.recipe.mainIngredients.size()) {
                 inputRedIngredients(player,"\033[31mRed\033[0m");
             }
@@ -580,8 +424,6 @@ Player handleCardEffect(Player player, const Card& card) {
             inputGreenIngredients(player,"\033[32mGreen\033[0m");
             }
         else  {
-
-            cout << "No more ingredients needed for this \033[32mGreen\033[0m.Plese select other COLOR ! ! !" << "\n";
             if (player.mainIngredients < player.recipe.mainIngredients.size()) {
                 inputRedIngredients(player,"\033[31mRed\033[0m");
             }
@@ -596,18 +438,8 @@ Player handleCardEffect(Player player, const Card& card) {
             }
         }
     }
-    else if (card.name == "Falling Mortar") {
-        removeIngredient(player, "\033[38;5;214mOrange\033[0m");
-        if (player.spices < 0) {
-            player.spices = 0;
-        }
-    }
-    else if (card.name == "Falling Tray") {
-        removeIngredient(player, "\033[32mGreen\033[0m");
-        if (player.specialIngredients < 0) {
-            player.specialIngredients = 0;
-        }
-    }
+
+    
     return player;
 }
 
@@ -688,6 +520,58 @@ vector<string> getUniqueColors(const vector<string>& resultsColour) {
 }
 
 
+void inputIngredientsByColor(Player& player, const vector<string>& colors) {
+    vector<string> uniqueColors = getUniqueColors(colors);
+    for (const string& color : uniqueColors) {
+        if (player.ingredientMap.find(color) == player.ingredientMap.end()) {
+            cout << "Unknown color category: " << color << endl;
+            continue;
+        }
+
+        cout << "\nPlease select an ingredient for " << color << " category:\n";
+        vector<string>& availableIngredients = player.ingredientMap[color];
+
+        if (player.selectedIndicesPerColor[color].size() == availableIngredients.size()) {
+            cout << "No more ingredients needed for this " << color << "\n";
+            continue;
+        }
+
+        for (size_t i = 0; i < availableIngredients.size(); ++i) {
+            if (player.selectedIndicesPerColor[color].find(i + 1) != player.selectedIndicesPerColor[color].end()) {
+                cout << i + 1 << ". " << availableIngredients[i] << " (\033[33mYou already selected\033[0m)\n";
+            } else {
+                cout << i + 1 << ". " << availableIngredients[i] << "\n";
+            }
+        }
+
+        int index;
+        while (true) {
+            cout << "Select ingredient number (1 - " << availableIngredients.size() << "): ";
+            cin >> index;
+
+            if (cin.fail() || index < 1 || index > availableIngredients.size()) {
+                cin.clear();
+                cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                cout << "Invalid input. Please enter a valid number.\n";
+                continue;
+            }
+
+            if (player.selectedIndicesPerColor[color].find(index) != player.selectedIndicesPerColor[color].end()) {
+                cout << "\nThis ingredient has already been selected. Please choose another.\n\n";
+                continue;
+            }
+
+            string selectedIngredient = availableIngredients[index - 1];
+            player.ingredients.push_back(selectedIngredient);
+            (*player.ingredientCountMap[color])++;
+            player.selectedIndicesPerColor[color].insert(index);
+            cout << "Added: " << selectedIngredient << " to your ingredients.\n";
+            break;
+        }
+    }
+}
+
+
 bool Winner(Player player){
     if(player.mainIngredients < player.recipe.mainIngredients.size()){
         return false;
@@ -741,38 +625,13 @@ string validateName(const vector<Player>& players, int playerNumber) {
 }
 
 void displayWinner(const string& winnerName) {
-    cout << "\n";
-    cout << "\033[1;33m******************************************\033[0m\n";
-    cout << "\033[1;33m*                                        *\033[0m\n";
-    cout << "\033[1;33m*           \033[1;32mCONGRATULATIONS!\033[1;33m             *\033[0m\n";
-    cout << "\033[1;33m*                                        *\033[0m\n";
-    cout << "\033[1;33m******************************************\033[0m\n";
-    cout << "\033[1;33m*                                        *\033[0m\n";
-    cout << "\033[1;33m*            \033[1;31m/\\     /\\     /\\\033[1;33m            *\033[0m\n";
-    cout << "\033[1;33m*           \033[1;31m/  \\   /  \\   /  \\\033[1;33m           *\033[0m\n";
-    cout << "\033[1;33m*          \033[1;31m/    \\ /    \\ /    \\\033[1;33m          *\033[0m\n";
-    cout << "\033[1;33m*         \033[1;31m/      \\      \\      \\\033[1;33m         *\033[0m\n";
-    cout << "\033[1;33m*        \033[1;31m/        \\      \\      \\\033[1;33m        *\033[0m\n";
-    cout << "\033[1;33m*       \033[1;31m/          \\      \\      \\\033[1;33m       *\033[0m\n";
-    cout << "\033[1;33m*      \033[1;31m/            \\      \\      \\\033[1;33m      *\033[0m\n";
-    cout << "\033[1;33m*     \033[1;31m/              \\      \\      \\\033[1;33m     *\033[0m\n";
-    cout << "\033[1;33m*                                        *\033[0m\n";
-    cout << "\033[1;33m*       \033[1;32m" << setw(11) << winnerName << " is the winner!\033[1;33m       *\033[0m\n";
-    cout << "\033[1;33m*                                        *\033[0m\n";
-    cout << "\033[1;33m*            \033[1;31m/\\     /\\     /\\\033[1;33m            *\033[0m\n";
-    cout << "\033[1;33m*           \033[1;31m/  \\   /  \\   /  \\\033[1;33m           *\033[0m\n";
-    cout << "\033[1;33m*          \033[1;31m/    \\ /    \\ /    \\\033[1;33m          *\033[0m\n";
-    cout << "\033[1;33m*         \033[1;31m/      \\      \\      \\\033[1;33m         *\033[0m\n";
-    cout << "\033[1;33m*        \033[1;31m/        \\      \\      \\\033[1;33m        *\033[0m\n";
-    cout << "\033[1;33m*       \033[1;31m/          \\      \\      \\\033[1;33m       *\033[0m\n";
-    cout << "\033[1;33m*      \033[1;31m/            \\      \\      \\\033[1;33m      *\033[0m\n";
-    cout << "\033[1;33m*                                        *\033[0m\n";
-    cout << "\033[1;33m******************************************\033[0m\n";
-    cout << "\033[1;33m*                                        *\033[0m\n";
-    cout << "\033[1;33m*    \033[1;32mYou are the Real gangster laab\033[1;33m      *\033[0m\n";
-    cout << "\033[1;33m*                                        *\033[0m\n";
-    cout << "\033[1;33m******************************************\033[0m\n";
-    cout << "\n";
+    cout << "\n******************************************\n";
+    cout << "*                                        *\n";
+    cout << "*           CONGRATULATIONS!             *\n";
+    cout << "*    You are the Real gangster laab      *\n";
+    cout << "*       "<< winnerName << " is the winner!               *\n";
+    cout << "*                                        *\n";
+    cout << "******************************************\n";
 }
 
 
@@ -841,22 +700,20 @@ int main(){
     }
     int i = 0;
     while(true){
-        clearScreen(); // ล้างหน้าจอก่อนเริ่มเทิร์นใหม่
-        cout << "\n\n\n"; 
+        cout << "\n\n\n";
+        cin.get(); 
         cout << "\033[32m#############################################################################################################\033[0m" << "\n" << endl;
         cout << "This is your turn: " <<  players[i].name << endl;
         cout << "\nPress [Enter] for roll dice";
         cin.get();
         vector<string> resultsColour = rollFourSideDice();
-        shownPlayerItem(players[i]);
         vector<string> uniqueColors = getUniqueColors(resultsColour);
 
         if(uniqueColors.size() == 4){
             cout << endl;
             printRecipe(players[i].recipe);
-            inputIngredientsByColor(players[i], uniqueColors); // ให้ผู้เล่นพิมพ์ส่วนผสมเองตามสีที่ได้
+            inputIngredientsByColor(players[i], resultsColour); // ให้ผู้เล่นพิมพ์ส่วนผสมเองตามสีที่ได้
             cout << endl;
-        
         } else {
             cout << endl;
             cout << "You must randomly draw a fortune card.!!!" << endl;
@@ -867,7 +724,7 @@ int main(){
             players[i] = handleCardEffect(players[i],card);
             cout << endl;
             printRecipe(players[i].recipe);
-            inputIngredientsByColor(players[i], uniqueColors); // ให้ผู้เล่นพิมพ์ส่วนผสมเองตามสีที่ได้
+            inputIngredientsByColor(players[i], resultsColour); // ให้ผู้เล่นพิมพ์ส่วนผสมเองตามสีที่ได้
         }
         
         cout << endl;
@@ -885,16 +742,6 @@ int main(){
             if(i >= numPlayers){
                 i = 0;
             }
-            for (int j = 0; j < 6; ++j) { // เพิ่มจำนวนรอบเป็น 6 รอบ
-                cout << "Preparing next turn";
-                for (int k = 0; k <= j % 3; ++k) { // ใช้ j % 3 เพื่อให้จุดเพิ่มขึ้นเรื่อยๆ และวนกลับ
-                    cout << ".";
-                }
-                cout.flush();
-                std::this_thread::sleep_for(chrono::milliseconds(500)); // หน่วงเวลา 500 มิลลิวินาทีในแต่ละรอบ
-                cout << "\r" << string(50, ' ') << "\r"; // Clear the line
-            }
-            cin.get();
             cout << "\n\033[32m#############################################################################################################\033[0m\n" << endl;
         }
        
